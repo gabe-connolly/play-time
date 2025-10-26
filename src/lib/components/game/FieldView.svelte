@@ -30,7 +30,7 @@
         players: posPlayers,
         needed
       };
-    })
+    }).reverse() // Reverse to show offensive (Forward) at top, defensive (Goalkeeper) at bottom
   );
 </script>
 
