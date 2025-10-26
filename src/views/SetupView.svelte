@@ -7,6 +7,7 @@
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
   import * as gameStore from '$lib/stores/gameStore.svelte.js';
 
+  const team = $derived(teamStore.getTeam());
   const sport = $derived(teamStore.getSport());
   const teamSize = $derived(teamStore.getTeamSize());
   const formation = $derived(teamStore.getFormation());
@@ -16,11 +17,19 @@
     sport && formation && players.length > 0
   );
 
+  $effect(() => {
+    if (team) {
+      teamStore.saveTeam(team);
+    }
+  })
+
   function handleStartGame() {
     if (canStartGame) {
       gameStore.goToGame();
     }
   }
+
+
 </script>
 
 <div class="min-h-screen bg-gray-100 p-4">

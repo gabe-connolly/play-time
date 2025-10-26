@@ -1,6 +1,6 @@
 <script>
-  import Button from '../shared/Button.svelte';
-  import Input from '../shared/Input.svelte';
+  import Button from '$components/shared/Button.svelte';
+  import Input from '$components/shared/Input.svelte';
 
   let { initialData = null, onSubmit, onCancel } = $props();
 

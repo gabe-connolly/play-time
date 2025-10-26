@@ -2,10 +2,10 @@
  * Team Store - Manages team state using Svelte 5 Runes
  */
 import { saveTeam, loadTeam } from '../utils/storage.js';
-import { Team } from '../models/Team.js';
-import { Player } from '../models/Player.js';
-import { generateId } from '../utils/idGenerator.js';
-import { getSportById } from '../config/sports.js';
+import { Team } from '$lib/models/Team.js';
+import { Player } from '$lib/models/Player.js';
+import { generateId } from '$lib/utils/idGenerator.js';
+import { getSportById } from '$lib/config/sports.js';
 
 // Create reactive state using $state rune
 let team = $state(null);
@@ -13,12 +13,7 @@ let sport = $state(null);
 let teamSize = $state(11);
 let formation = $state(null);
 
-// Add $effect to auto-save when team changes
-$effect(() => {
-  if (team) {
-    saveTeam(team);
-  }
-});
+
 
 export function restoreTeam() {
   const savedData = loadTeam();

@@ -8,5 +8,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+  },
+  resolve: {
+    alias: {
+      $components: '/src/lib/components',
+      $src: '/src',
+    }
   }
 });
