@@ -17,18 +17,11 @@
     sport && formation && players.length > 0
   );
 
-  $effect(() => {
-    if (team) {
-      teamStore.saveTeam(team);
-    }
-  })
-
   function handleStartGame() {
     if (canStartGame) {
       gameStore.goToGame();
     }
   }
-
 
 </script>
 

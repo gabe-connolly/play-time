@@ -1,7 +1,6 @@
 const CACHE_NAME = 'field-coach-v1';
 const urlsToCache = [
   '/',
-  '/index.html',
   '/manifest.json'
 ];
 
