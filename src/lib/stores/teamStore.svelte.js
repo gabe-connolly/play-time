@@ -53,6 +53,18 @@ export function setSport(selectedSport) {
   const defaultSize = selectedSport.maxPlayers;
   teamSize = defaultSize;
   formation = selectedSport.getFormationsForTeamSize(defaultSize)[0];
+  
+  // Initialize team if not already initialized
+  if (!team) {
+    team = new Team({
+      id: generateId(),
+      name: 'My Team',
+      sportId: selectedSport.id,
+      teamSize: defaultSize,
+      players: [],
+      activeFormation: formation
+    });
+  }
 }
 
 /**
@@ -88,6 +100,8 @@ export function addPlayer(playerData) {
   });
 
   team.addPlayer(player);
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
 }
 
 /**
@@ -96,6 +110,8 @@ export function addPlayer(playerData) {
 export function updatePlayer(playerId, updates) {
   if (!team) return;
   team.updatePlayer(playerId, updates);
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
 }
 
 /**
@@ -104,6 +120,8 @@ export function updatePlayer(playerId, updates) {
 export function deletePlayer(playerId) {
   if (!team) return;
   team.removePlayer(playerId);
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
 }
 
 /**
@@ -115,6 +133,8 @@ export function assignPlayerToPosition(playerId, positionName) {
   const player = team.getPlayer(playerId);
   if (player) {
     player.assignToPosition(positionName);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
   }
 }
 
@@ -127,6 +147,8 @@ export function movePlayerToBench(playerId) {
   const player = team.getPlayer(playerId);
   if (player) {
     player.moveToBench();
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
   }
 }
 
@@ -143,6 +165,8 @@ export function substitutePlayers(onFieldPlayerId, benchPlayerId) {
     const position = onFieldPlayer.position;
     onFieldPlayer.moveToBench();
     benchPlayer.assignToPosition(position);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
   }
 }
 
@@ -178,7 +202,7 @@ export function getFormation() {
  * Get all players (reactive)
  */
 export function getPlayers() {
-  return team?.players || [];
+  return team?.players ?? [];
 }
 
 /**
