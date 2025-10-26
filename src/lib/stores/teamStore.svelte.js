@@ -265,3 +265,20 @@ export function clearPendingPositions() {
   // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
 }
+
+/**
+ * Initialize pending positions from active positions
+ */
+export function initializePendingFromActive() {
+  if (!team) return;
+
+  team.players.forEach(player => {
+    if (player.isOnField()) {
+      player.assignToPendingPosition(player.position);
+    } else {
+      player.clearPendingPosition();
+    }
+  });
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
+}

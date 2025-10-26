@@ -94,17 +94,11 @@
     const newMode = fieldMode === 'active' ? 'pending' : 'active';
     
     if (newMode === 'active' && fieldMode === 'pending') {
-      // Apply pending positions
+      // Apply pending positions (move pending to active)
       teamStore.applyPendingPositions();
     } else if (newMode === 'pending') {
-      // Copy current positions to pending
-      team?.players.forEach(player => {
-        if (player.isOnField()) {
-          player.assignToPendingPosition(player.position);
-        } else {
-          player.clearPendingPosition();
-        }
-      });
+      // Copy current positions to pending for editing
+      teamStore.initializePendingFromActive();
     }
     
     gameStore.setFieldMode(newMode);
