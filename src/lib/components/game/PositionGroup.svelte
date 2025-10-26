@@ -15,6 +15,31 @@
     Array(needed).fill(null).map((_, i) => players[i] || null)
   );
 
+  // Determine directional label based on slot position
+  function getDirectionalLabel(index, total) {
+    if (total === 1) return 'Center';
+    if (total === 2) return index === 0 ? 'Left' : 'Right';
+    if (total === 3) {
+      if (index === 0) return 'Left';
+      if (index === 1) return 'Center';
+      return 'Right';
+    }
+    if (total === 4) {
+      if (index === 0) return 'Left';
+      if (index === 1) return 'Center Left';
+      if (index === 2) return 'Center Right';
+      return 'Right';
+    }
+    if (total === 5) {
+      if (index === 0) return 'Left';
+      if (index === 1) return 'Center Left';
+      if (index === 2) return 'Center';
+      if (index === 3) return 'Center Right';
+      return 'Right';
+    }
+    return `Position ${index + 1}`;
+  }
+
   function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -62,6 +87,7 @@
         ondragstart={(e) => player && handleDragStart(e, player)}
       >
         {#if player}
+          <div class="text-xs text-gray-500 mb-1 opacity-70">{getDirectionalLabel(idx, needed)}</div>
           <div class="font-semibold text-sm">
             {getDisplayName(player, displayFormat)}
           </div>
@@ -74,6 +100,7 @@
             </div>
           {/if}
         {:else}
+          <div class="text-xs text-gray-400 mb-1">{getDirectionalLabel(idx, needed)}</div>
           <div class="text-sm text-gray-600">Empty</div>
         {/if}
       </button>
