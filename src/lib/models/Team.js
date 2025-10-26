@@ -27,7 +27,7 @@ export class Team {
    * @param {Player} player
    */
   addPlayer(player) {
-    this.players.push(player);
+    this.players = [...this.players, player];
   }
 
   /**
@@ -38,7 +38,7 @@ export class Team {
   removePlayer(playerId) {
     const index = this.players.findIndex(p => p.id === playerId);
     if (index !== -1) {
-      this.players.splice(index, 1);
+      this.players = [...this.players.slice(0, index), ...this.players.slice(index + 1)];
       return true;
     }
     return false;
@@ -60,9 +60,10 @@ export class Team {
    * @returns {boolean} True if player was updated
    */
   updatePlayer(playerId, updates) {
-    const player = this.getPlayer(playerId);
-    if (player) {
-      Object.assign(player, updates);
+    const index = this.players.findIndex(p => p.id === playerId);
+    if (index !== -1) {
+      const updatedPlayer = Object.assign(Object.create(Object.getPrototypeOf(this.players[index])), this.players[index], updates);
+      this.players = [...this.players.slice(0, index), updatedPlayer, ...this.players.slice(index + 1)];
       return true;
     }
     return false;
