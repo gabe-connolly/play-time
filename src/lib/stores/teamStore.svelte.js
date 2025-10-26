@@ -133,6 +133,8 @@ export function assignPlayerToPosition(playerId, positionName) {
   const player = team.getPlayer(playerId);
   if (player) {
     player.assignToPosition(positionName);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
   }
 }
 
@@ -145,6 +147,8 @@ export function movePlayerToBench(playerId) {
   const player = team.getPlayer(playerId);
   if (player) {
     player.moveToBench();
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
   }
 }
 
@@ -161,6 +165,8 @@ export function substitutePlayers(onFieldPlayerId, benchPlayerId) {
     const position = onFieldPlayer.position;
     onFieldPlayer.moveToBench();
     benchPlayer.assignToPosition(position);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
   }
 }
 

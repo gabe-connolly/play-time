@@ -62,7 +62,8 @@ export class Team {
   updatePlayer(playerId, updates) {
     const index = this.players.findIndex(p => p.id === playerId);
     if (index !== -1) {
-      const updatedPlayer = Object.assign(Object.create(Object.getPrototypeOf(this.players[index])), this.players[index], updates);
+      const currentPlayer = this.players[index];
+      const updatedPlayer = new Player({ ...currentPlayer, ...updates });
       this.players = [...this.players.slice(0, index), updatedPlayer, ...this.players.slice(index + 1)];
       return true;
     }
