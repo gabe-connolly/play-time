@@ -3,7 +3,7 @@
   import TeamSizeSelector from '$lib/components/setup/TeamSizeSelector.svelte';
   import FormationSelector from '$lib/components/setup/FormationSelector.svelte';
   import PlayerList from '$lib/components/setup/PlayerList.svelte';
-  import { Button } from '$lib/components/shared/Button.svelte';
+  import Button from '$lib/components/shared/Button.svelte';
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
   import * as gameStore from '$lib/stores/gameStore.svelte.js';
 

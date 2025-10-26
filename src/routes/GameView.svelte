@@ -3,7 +3,7 @@
   import FieldView from '$lib/components/game/FieldView.svelte';
   import BenchView from '$lib/components/game/BenchView.svelte';
   import SubstitutionPanel from '$lib/components/game/SubstitutionPanel.svelte';
-  import { Button } from '$lib/components/shared/Button.svelte';
+  import Button from '$lib/components/shared/Button.svelte';
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
   import * as gameStore from '$lib/stores/gameStore.svelte.js';
 
