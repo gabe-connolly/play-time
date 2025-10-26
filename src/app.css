@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* Position color classes for consistency */
+.position-goalkeeper {
+  @apply bg-yellow-400;
+}
+
+.position-defender {
+  @apply bg-blue-400;
+}
+
+.position-midfielder {
+  @apply bg-green-400;
+}
+
+.position-forward {
+  @apply bg-red-400;
+}
