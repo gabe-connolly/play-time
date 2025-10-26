@@ -7,21 +7,33 @@
     displayFormat = 'full',
     isSelected = false,
     showActions = false,
+    draggable = false,
     onSelect = null,
     onEdit = null,
     onDelete = null
   } = $props();
+
+  function handleDragStart(e) {
+    if (!draggable) return;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      playerId: player.id,
+      sourceType: 'bench'
+    }));
+  }
 </script>
 
 <div
   class={`flex items-center justify-between p-3 rounded-lg transition-colors ${
     onSelect ? 'cursor-pointer' : ''
-  } ${
+  } ${draggable ? 'cursor-move' : ''} ${
     isSelected ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50 hover:bg-gray-100'
   }`}
   onclick={() => onSelect?.(player.id)}
   role={onSelect ? 'button' : 'presentation'}
-  tabindex={onSelect ? 0 : -1}
+  tabindex={onSelect ? 0 : undefined}
+  draggable={draggable}
+  ondragstart={handleDragStart}
 >
   <div>
     <span class="font-medium">{getDisplayName(player, displayFormat)}</span>

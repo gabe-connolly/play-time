@@ -11,7 +11,8 @@ export class Player {
     nickname = '',
     jerseyNumber = '',
     status = 'on_bench',
-    position = null
+    position = null,
+    pendingPosition = null
   }) {
     this.id = id;
     this.firstName = firstName;
@@ -20,6 +21,7 @@ export class Player {
     this.jerseyNumber = jerseyNumber;
     this.status = status; // 'on_field' | 'on_bench'
     this.position = position; // Position name or null
+    this.pendingPosition = pendingPosition; // Pending position name or null
   }
 
   /**
@@ -71,6 +73,35 @@ export class Player {
   }
 
   /**
+   * Assign player to a pending position
+   * @param {string} positionName
+   */
+  assignToPendingPosition(positionName) {
+    this.pendingPosition = positionName;
+  }
+
+  /**
+   * Clear pending position
+   */
+  clearPendingPosition() {
+    this.pendingPosition = null;
+  }
+
+  /**
+   * Apply pending position (move pending to active)
+   */
+  applyPendingPosition() {
+    if (this.pendingPosition !== null) {
+      this.position = this.pendingPosition;
+      this.status = 'on_field';
+      this.pendingPosition = null;
+    } else {
+      // If no pending position, move to bench
+      this.moveToBench();
+    }
+  }
+
+  /**
    * Create a plain object from player (for serialization)
    * @returns {Object}
    */
@@ -82,7 +113,8 @@ export class Player {
       nickname: this.nickname,
       jerseyNumber: this.jerseyNumber,
       status: this.status,
-      position: this.position
+      position: this.position,
+      pendingPosition: this.pendingPosition
     };
   }
 

@@ -7,6 +7,7 @@ let currentView = $state('setup'); // 'setup' | 'game'
 let displayFormat = $state('full'); // 'full' | 'nickname' | 'last'
 let substituting = $state(null); // Player ID being substituted
 let selectedBenchPlayer = $state(null); // Selected bench player for substitution
+let fieldMode = $state('active'); // 'active' | 'pending'
 
 /**
  * Navigate to setup view
@@ -15,6 +16,7 @@ export function goToSetup() {
   currentView = 'setup';
   substituting = null;
   selectedBenchPlayer = null;
+  fieldMode = 'active';
 }
 
 /**
@@ -87,4 +89,25 @@ export function getSelectedBenchPlayer() {
  */
 export function isSubstituting() {
   return substituting !== null;
+}
+
+/**
+ * Set field mode (active or pending)
+ */
+export function setFieldMode(mode) {
+  fieldMode = mode;
+}
+
+/**
+ * Get field mode (reactive)
+ */
+export function getFieldMode() {
+  return fieldMode;
+}
+
+/**
+ * Check if in pending mode
+ */
+export function isPendingMode() {
+  return fieldMode === 'pending';
 }

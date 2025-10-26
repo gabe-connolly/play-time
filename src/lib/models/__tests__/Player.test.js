@@ -76,7 +76,10 @@ describe('Player Model', () => {
     const player = new Player(playerData);
     const json = player.toJSON();
 
-    expect(json).toEqual(playerData);
+    expect(json).toEqual({
+      ...playerData,
+      pendingPosition: null
+    });
   });
 
   it('should deserialize from JSON', () => {
@@ -85,5 +88,40 @@ describe('Player Model', () => {
     expect(player).toBeInstanceOf(Player);
     expect(player.id).toBe('player1');
     expect(player.firstName).toBe('John');
+  });
+
+  it('should assign player to pending position', () => {
+    const player = new Player(playerData);
+    player.assignToPendingPosition('Forward');
+
+    expect(player.pendingPosition).toBe('Forward');
+    expect(player.status).toBe('on_bench'); // Should still be on bench
+  });
+
+  it('should clear pending position', () => {
+    const player = new Player(playerData);
+    player.assignToPendingPosition('Forward');
+    player.clearPendingPosition();
+
+    expect(player.pendingPosition).toBe(null);
+  });
+
+  it('should apply pending position', () => {
+    const player = new Player(playerData);
+    player.assignToPendingPosition('Forward');
+    player.applyPendingPosition();
+
+    expect(player.position).toBe('Forward');
+    expect(player.status).toBe('on_field');
+    expect(player.pendingPosition).toBe(null);
+  });
+
+  it('should move to bench when applying null pending position', () => {
+    const player = new Player({...playerData, status: 'on_field', position: 'Forward'});
+    player.clearPendingPosition();
+    player.applyPendingPosition();
+
+    expect(player.position).toBe(null);
+    expect(player.status).toBe('on_bench');
   });
 });

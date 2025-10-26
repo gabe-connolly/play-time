@@ -7,12 +7,37 @@
     needed,
     displayFormat = 'full',
     substitutingPlayerId = null,
-    onPlayerClick
+    onPlayerClick,
+    onDropPlayer = null
   } = $props();
 
   const slots = $derived(
     Array(needed).fill(null).map((_, i) => players[i] || null)
   );
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  function handleDrop(e, slotIndex) {
+    e.preventDefault();
+    const data = JSON.parse(e.dataTransfer.getData('application/json'));
+    
+    if (onDropPlayer) {
+      const currentPlayer = slots[slotIndex];
+      onDropPlayer(data.playerId, position.name, currentPlayer?.id);
+    }
+  }
+
+  function handleDragStart(e, player) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      playerId: player.id,
+      sourceType: 'field',
+      sourcePosition: position.name
+    }));
+  }
 </script>
 
 <div class="bg-white/10 rounded-lg p-3">
@@ -28,9 +53,13 @@
       <button
         class={`${position.color} rounded-lg p-3 text-center min-h-[60px] flex flex-col items-center justify-center hover:opacity-80 transition-opacity ${
           substitutingPlayerId === player?.id ? 'ring-2 ring-red-500' : ''
-        }`}
+        } ${!player ? 'border-2 border-dashed border-white/30' : ''}`}
         onclick={() => player && onPlayerClick?.(player.id)}
         disabled={!player}
+        ondragover={handleDragOver}
+        ondrop={(e) => handleDrop(e, idx)}
+        draggable={!!player}
+        ondragstart={(e) => player && handleDragStart(e, player)}
       >
         {#if player}
           <div class="font-semibold text-sm">

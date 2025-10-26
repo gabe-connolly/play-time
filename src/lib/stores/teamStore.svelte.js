@@ -225,3 +225,43 @@ export function getBenchPlayers() {
 export function getFormationStatus() {
   return team && formation ? team.getFormationStatus(formation) : {};
 }
+
+/**
+ * Assign player to pending position
+ */
+export function assignPlayerToPendingPosition(playerId, positionName) {
+  if (!team) return;
+
+  const player = team.getPlayer(playerId);
+  if (player) {
+    player.assignToPendingPosition(positionName);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
+  }
+}
+
+/**
+ * Apply all pending positions (swap to pending field)
+ */
+export function applyPendingPositions() {
+  if (!team) return;
+
+  team.players.forEach(player => {
+    player.applyPendingPosition();
+  });
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
+}
+
+/**
+ * Clear all pending positions
+ */
+export function clearPendingPositions() {
+  if (!team) return;
+
+  team.players.forEach(player => {
+    player.clearPendingPosition();
+  });
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
+}

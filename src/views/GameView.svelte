@@ -14,9 +14,11 @@
   const displayFormat = $derived(gameStore.getDisplayFormat());
   const substitutingPlayerId = $derived(gameStore.getSubstitutingPlayer());
   const selectedBenchPlayerId = $derived(gameStore.getSelectedBenchPlayer());
+  const fieldMode = $derived(gameStore.getFieldMode());
 
   const isSubstituting = $derived(gameStore.isSubstituting());
   const formationStatus = $derived(teamStore.getFormationStatus());
+  const isPendingMode = $derived(fieldMode === 'pending');
 
   const substitutingPlayer = $derived(
     substitutingPlayerId ? team?.getPlayer(substitutingPlayerId) : null
@@ -38,7 +40,11 @@
 
   function handleAssignPosition(positionName) {
     if (selectedBenchPlayerId) {
-      teamStore.assignPlayerToPosition(selectedBenchPlayerId, positionName);
+      if (isPendingMode) {
+        teamStore.assignPlayerToPendingPosition(selectedBenchPlayerId, positionName);
+      } else {
+        teamStore.assignPlayerToPosition(selectedBenchPlayerId, positionName);
+      }
       gameStore.selectBenchPlayer(null);
     }
   }
@@ -56,6 +62,53 @@
       gameStore.cancelSubstitution();
     }
   }
+
+  function handleDropPlayer(playerId, positionName, replacedPlayerId) {
+    if (isPendingMode) {
+      teamStore.assignPlayerToPendingPosition(playerId, positionName);
+      if (replacedPlayerId) {
+        // If there's a player in the slot, move them to bench in pending
+        const replacedPlayer = team?.getPlayer(replacedPlayerId);
+        if (replacedPlayer) {
+          replacedPlayer.clearPendingPosition();
+        }
+      }
+    } else {
+      if (replacedPlayerId) {
+        // Swap players
+        teamStore.substitutePlayers(replacedPlayerId, playerId);
+      } else {
+        // Just assign to position
+        teamStore.assignPlayerToPosition(playerId, positionName);
+      }
+    }
+  }
+
+  function handleDropToBench(playerId) {
+    if (!isPendingMode) {
+      teamStore.movePlayerToBench(playerId);
+    }
+  }
+
+  function handleFieldModeToggle() {
+    const newMode = fieldMode === 'active' ? 'pending' : 'active';
+    
+    if (newMode === 'active' && fieldMode === 'pending') {
+      // Apply pending positions
+      teamStore.applyPendingPositions();
+    } else if (newMode === 'pending') {
+      // Copy current positions to pending
+      team?.players.forEach(player => {
+        if (player.isOnField()) {
+          player.assignToPendingPosition(player.position);
+        } else {
+          player.clearPendingPosition();
+        }
+      });
+    }
+    
+    gameStore.setFieldMode(newMode);
+  }
 </script>
 
 <div class="min-h-screen bg-gray-100 p-4">
@@ -71,7 +124,30 @@
         <h1 class="text-2xl font-bold text-gray-800">
           {sport?.name} - {formation?.name}
         </h1>
-        <div class="w-32"></div>
+        <div class="flex gap-2">
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              fieldMode === 'active'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            onclick={handleFieldModeToggle}
+            disabled={fieldMode === 'active'}
+          >
+            Active
+          </button>
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              fieldMode === 'pending'
+                ? 'bg-orange-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            onclick={handleFieldModeToggle}
+            disabled={fieldMode === 'pending'}
+          >
+            Pending
+          </button>
+        </div>
       </div>
 
       <FieldView
@@ -80,7 +156,9 @@
         {players}
         {displayFormat}
         {substitutingPlayerId}
+        {isPendingMode}
         onPlayerClick={handleFieldPlayerClick}
+        onDropPlayer={handleDropPlayer}
       />
 
       {#if isSubstituting && substitutingPlayer}
@@ -103,6 +181,7 @@
         {isSubstituting}
         onSelectPlayer={handleBenchPlayerSelect}
         onAssignPosition={handleAssignPosition}
+        onDropToBench={handleDropToBench}
       />
     </div>
   </div>
