@@ -138,10 +138,10 @@
     </span>
   </div>
 
-  <div class="grid grid-cols-4 gap-2">
+  <div class="flex flex-wrap gap-2 justify-center">
     {#each slots as player, idx (idx)}
       <button
-        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] flex flex-col items-center justify-center hover:opacity-80 transition-opacity ${
+        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] flex-1 min-w-[150px] max-w-[200px] flex flex-col items-center justify-center hover:opacity-80 transition-opacity ${
           substitutingPlayerId === player?.id ? 'ring-2 ring-red-500' : ''
         } ${!player ? 'border-2 border-dashed border-white/30' : ''}`}
         onclick={() => player && onPlayerClick?.(player.id)}
