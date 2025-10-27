@@ -68,7 +68,13 @@
 
   function handleMoveToBench() {
     if (substitutingPlayerId) {
-      teamStore.movePlayerToBench(substitutingPlayerId);
+      if (isPendingMode) {
+        // In pending mode, clear the pending position to remove from pending field
+        teamStore.clearPlayerPendingPosition(substitutingPlayerId);
+      } else {
+        // In active mode, move player to bench normally
+        teamStore.movePlayerToBench(substitutingPlayerId);
+      }
       gameStore.cancelSubstitution();
     }
   }
