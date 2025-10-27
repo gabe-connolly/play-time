@@ -25,9 +25,16 @@
         : fieldPlayers.filter(p => p.position === pos.name);
       const needed = formation.getPositionCount(pos.name);
 
+      // Sort players by their position index to maintain slot order
+      const sortedPlayers = posPlayers.sort((a, b) => {
+        const aIndex = isPendingMode ? (a.pendingPositionIndex ?? 999) : (a.positionIndex ?? 999);
+        const bIndex = isPendingMode ? (b.pendingPositionIndex ?? 999) : (b.positionIndex ?? 999);
+        return aIndex - bIndex;
+      });
+
       return {
         position: pos,
-        players: posPlayers,
+        players: sortedPlayers,
         needed
       };
     }).reverse() // Reverse to show offensive (Forward) at top, defensive (Goalkeeper) at bottom
@@ -47,6 +54,7 @@
           needed={group.needed}
           {displayFormat}
           {substitutingPlayerId}
+          {isPendingMode}
           {onPlayerClick}
           {onDropPlayer}
         />

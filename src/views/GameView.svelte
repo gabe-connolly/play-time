@@ -40,10 +40,27 @@
 
   function handleAssignPosition(positionName) {
     if (selectedBenchPlayerId) {
+      // Find the first available slot index in this position
+      const playersInPosition = players.filter(p => 
+        (isPendingMode ? p.pendingPosition : p.position) === positionName
+      );
+      const formationObj = teamStore.getFormation();
+      const totalSlots = formationObj.getPositionCount(positionName);
+      
+      // Find first empty slot
+      let slotIndex = 0;
+      for (let i = 0; i < totalSlots; i++) {
+        const indexKey = isPendingMode ? 'pendingPositionIndex' : 'positionIndex';
+        if (!playersInPosition.find(p => p[indexKey] === i)) {
+          slotIndex = i;
+          break;
+        }
+      }
+      
       if (isPendingMode) {
-        teamStore.assignPlayerToPendingPosition(selectedBenchPlayerId, positionName);
+        teamStore.assignPlayerToPendingPosition(selectedBenchPlayerId, positionName, slotIndex);
       } else {
-        teamStore.assignPlayerToPosition(selectedBenchPlayerId, positionName);
+        teamStore.assignPlayerToPosition(selectedBenchPlayerId, positionName, slotIndex);
       }
       gameStore.selectBenchPlayer(null);
     }
@@ -58,28 +75,61 @@
 
   function handleCompleteSubstitution() {
     if (substitutingPlayerId && selectedBenchPlayerId) {
-      teamStore.substitutePlayers(substitutingPlayerId, selectedBenchPlayerId);
+      const onFieldPlayer = team?.getPlayer(substitutingPlayerId);
+      const slotIndex = onFieldPlayer?.positionIndex;
+      teamStore.substitutePlayers(substitutingPlayerId, selectedBenchPlayerId, slotIndex);
       gameStore.cancelSubstitution();
     }
   }
 
-  function handleDropPlayer(playerId, positionName, replacedPlayerId) {
+  function handleDropPlayer(playerId, positionName, slotIndex, replacedPlayerId, sourcePosition, sourceSlotIndex) {
     if (isPendingMode) {
-      teamStore.assignPlayerToPendingPosition(playerId, positionName);
-      if (replacedPlayerId) {
-        // If there's a player in the slot, move them to bench in pending
+      if (replacedPlayerId && replacedPlayerId !== playerId) {
+        // Swap in pending mode - need to update both players
+        const draggedPlayer = team?.getPlayer(playerId);
         const replacedPlayer = team?.getPlayer(replacedPlayerId);
-        if (replacedPlayer) {
-          replacedPlayer.clearPendingPosition();
+        
+        if (draggedPlayer && replacedPlayer) {
+          // Store replaced player's position info
+          const tempPosition = replacedPlayer.pendingPosition;
+          const tempSlotIndex = replacedPlayer.pendingPositionIndex;
+          
+          // Move replaced player to dragged player's original position
+          if (draggedPlayer.pendingPosition) {
+            replacedPlayer.assignToPendingPosition(draggedPlayer.pendingPosition, draggedPlayer.pendingPositionIndex);
+          } else {
+            replacedPlayer.clearPendingPosition();
+          }
+          
+          // Move dragged player to target position
+          draggedPlayer.assignToPendingPosition(positionName, slotIndex);
+          
+          // Manually trigger reactivity by reassigning team
+          const currentTeam = teamStore.getTeam();
+          if (currentTeam) {
+            teamStore.assignPlayerToPendingPosition(playerId, positionName, slotIndex);
+            if (tempPosition) {
+              teamStore.assignPlayerToPendingPosition(replacedPlayerId, tempPosition, tempSlotIndex);
+            }
+          }
         }
+      } else {
+        // Just assign to the specific slot in pending mode
+        teamStore.assignPlayerToPendingPosition(playerId, positionName, slotIndex);
       }
     } else {
-      if (replacedPlayerId) {
-        // Swap players
-        teamStore.substitutePlayers(replacedPlayerId, playerId);
-      } else {
-        // Just assign to position
-        teamStore.assignPlayerToPosition(playerId, positionName);
+      // Active mode
+      const draggedPlayer = team?.getPlayer(playerId);
+      
+      if (replacedPlayerId && replacedPlayerId !== playerId) {
+        // Swap players between slots
+        teamStore.swapFieldPlayers(playerId, replacedPlayerId);
+      } else if (draggedPlayer?.isOnBench()) {
+        // Assign bench player to specific slot
+        teamStore.assignPlayerToPosition(playerId, positionName, slotIndex);
+      } else if (draggedPlayer?.isOnField()) {
+        // Move player to different slot (same or different position)
+        teamStore.assignPlayerToPosition(playerId, positionName, slotIndex);
       }
     }
   }

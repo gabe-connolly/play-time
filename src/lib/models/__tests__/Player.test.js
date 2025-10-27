@@ -78,7 +78,9 @@ describe('Player Model', () => {
 
     expect(json).toEqual({
       ...playerData,
-      pendingPosition: null
+      positionIndex: null,
+      pendingPosition: null,
+      pendingPositionIndex: null
     });
   });
 
