@@ -2,7 +2,7 @@
   import Input from '$lib/components/shared/Input.svelte';
   import Textarea from '$lib/components/shared/Textarea.svelte';
 
-  let { teamName = $bindable(''), teamDescription = $bindable('') } = $props();
+  let { teamName = '', teamDescription = '', onNameChange, onDescriptionChange } = $props();
 </script>
 
 <div class="mb-6">
@@ -15,7 +15,8 @@
       <Input
         type="text"
         placeholder="Enter team name"
-        bind:value={teamName}
+        value={teamName}
+        oninput={(e) => onNameChange?.(e.target.value)}
       />
     </div>
     <div>
@@ -24,7 +25,8 @@
       </label>
       <Textarea
         placeholder="Enter team description (optional)"
-        bind:value={teamDescription}
+        value={teamDescription}
+        oninput={(e) => onDescriptionChange?.(e.target.value)}
         rows={3}
       />
     </div>

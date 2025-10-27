@@ -14,30 +14,22 @@
   const formation = $derived(teamStore.getFormation());
   const players = $derived(teamStore.getPlayers());
 
-  let teamName = $state(team?.name || 'My Team');
-  let teamDescription = $state(team?.description || '');
+  // Derive team name and description directly from the team
+  const teamName = $derived(team?.name ?? 'My Team');
+  const teamDescription = $derived(team?.description ?? '');
 
-  // Watch for team changes and update local state
-  $effect(() => {
+  // Handler functions for updating team info
+  function handleTeamNameChange(newName) {
     if (team) {
-      teamName = team.name;
-      teamDescription = team.description;
+      teamStore.setTeamName(newName);
     }
-  });
+  }
 
-  // Update team store when name changes
-  $effect(() => {
-    if (team && teamName !== team.name) {
-      teamStore.setTeamName(teamName);
+  function handleTeamDescriptionChange(newDescription) {
+    if (team) {
+      teamStore.setTeamDescription(newDescription);
     }
-  });
-
-  // Update team store when description changes
-  $effect(() => {
-    if (team && teamDescription !== team.description) {
-      teamStore.setTeamDescription(teamDescription);
-    }
-  });
+  }
 
   const canStartGame = $derived(
     sport && formation && players.length > 0
@@ -76,8 +68,10 @@
 
       {#if sport}
         <TeamInfoForm
-          bind:teamName
-          bind:teamDescription
+          {teamName}
+          {teamDescription}
+          onNameChange={handleTeamNameChange}
+          onDescriptionChange={handleTeamDescriptionChange}
         />
       {/if}
 
