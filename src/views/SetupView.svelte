@@ -2,6 +2,7 @@
   import SportSelector from '$lib/components/setup/SportSelector.svelte';
   import TeamSizeSelector from '$lib/components/setup/TeamSizeSelector.svelte';
   import FormationSelector from '$lib/components/setup/FormationSelector.svelte';
+  import TeamInfoForm from '$lib/components/setup/TeamInfoForm.svelte';
   import PlayerList from '$lib/components/setup/PlayerList.svelte';
   import Button from '$lib/components/shared/Button.svelte';
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
@@ -12,6 +13,23 @@
   const teamSize = $derived(teamStore.getTeamSize());
   const formation = $derived(teamStore.getFormation());
   const players = $derived(teamStore.getPlayers());
+
+  // Derive team name and description directly from the team
+  const teamName = $derived(team?.name ?? 'My Team');
+  const teamDescription = $derived(team?.description ?? '');
+
+  // Handler functions for updating team info
+  function handleTeamNameChange(newName) {
+    if (team) {
+      teamStore.setTeamName(newName);
+    }
+  }
+
+  function handleTeamDescriptionChange(newDescription) {
+    if (team) {
+      teamStore.setTeamDescription(newDescription);
+    }
+  }
 
   const canStartGame = $derived(
     sport && formation && players.length > 0
@@ -47,6 +65,15 @@
         {formation}
         onSelect={teamStore.setFormation}
       />
+
+      {#if sport}
+        <TeamInfoForm
+          {teamName}
+          {teamDescription}
+          onNameChange={handleTeamNameChange}
+          onDescriptionChange={handleTeamDescriptionChange}
+        />
+      {/if}
 
       <PlayerList
         {players}

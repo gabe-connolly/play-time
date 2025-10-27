@@ -89,6 +89,28 @@ export function setFormation(newFormation) {
 }
 
 /**
+ * Set team name
+ */
+export function setTeamName(name) {
+  if (team) {
+    team.name = name;
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
+  }
+}
+
+/**
+ * Set team description
+ */
+export function setTeamDescription(description) {
+  if (team) {
+    team.description = description;
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
+  }
+}
+
+/**
  * Add player to team
  */
 export function addPlayer(playerData) {

@@ -9,6 +9,7 @@ export class Team {
   constructor({
     id,
     name,
+    description = '',
     sportId,
     teamSize,
     players = [],
@@ -16,6 +17,7 @@ export class Team {
   }) {
     this.id = id;
     this.name = name;
+    this.description = description;
     this.sportId = sportId;
     this.teamSize = teamSize;
     this.players = players.map(p => p instanceof Player ? p : Player.fromJSON(p));
@@ -141,6 +143,7 @@ export class Team {
     return {
       id: this.id,
       name: this.name,
+      description: this.description,
       sportId: this.sportId,
       teamSize: this.teamSize,
       players: this.players.map(p => p.toJSON()),
