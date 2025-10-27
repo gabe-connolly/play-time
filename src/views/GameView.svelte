@@ -245,7 +245,7 @@
       </div>
 
       <!-- Right Column: Roster Sidebar -->
-      <div class="w-80" style="height: calc(100vh - 180px);">
+      <div class="w-80 sticky top-4" style="max-height: calc(100vh - 2rem);">
         <RosterView
           {players}
           {displayFormat}
