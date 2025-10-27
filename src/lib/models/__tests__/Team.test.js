@@ -40,6 +40,33 @@ describe('Team Model', () => {
     expect(team.sportId).toBe('soccer');
     expect(team.teamSize).toBe(7);
     expect(team.players).toEqual([]);
+    expect(team.description).toBe('');
+  });
+
+  it('should create a team with a description', () => {
+    const teamWithDescription = new Team({
+      id: 'team2',
+      name: 'Test Team 2',
+      description: 'This is a test team',
+      sportId: 'soccer',
+      teamSize: 11
+    });
+    expect(teamWithDescription.description).toBe('This is a test team');
+  });
+
+  it('should serialize and deserialize team with description', () => {
+    const teamWithDescription = new Team({
+      id: 'team3',
+      name: 'Test Team 3',
+      description: 'A great team',
+      sportId: 'soccer',
+      teamSize: 11
+    });
+    const json = teamWithDescription.toJSON();
+    expect(json.description).toBe('A great team');
+    
+    const restored = Team.fromJSON(json);
+    expect(restored.description).toBe('A great team');
   });
 
   it('should add a player to the team', () => {
