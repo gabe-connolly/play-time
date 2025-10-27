@@ -2,6 +2,7 @@
   import { ChevronLeft } from 'lucide-svelte';
   import FieldView from '$lib/components/game/FieldView.svelte';
   import BenchView from '$lib/components/game/BenchView.svelte';
+  import RosterView from '$lib/components/game/RosterView.svelte';
   import SubstitutionPanel from '$lib/components/game/SubstitutionPanel.svelte';
   import Button from '$lib/components/shared/Button.svelte';
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
@@ -162,9 +163,10 @@
 </script>
 
 <div class="min-h-screen bg-gray-100 p-4">
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center justify-between">
         <button
           class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
           onclick={gameStore.goToSetup}
@@ -199,40 +201,56 @@
           </button>
         </div>
       </div>
+    </div>
 
-      <FieldView
-        {sport}
-        {formation}
-        {players}
-        {displayFormat}
-        {substitutingPlayerId}
-        {isPendingMode}
-        onPlayerClick={handleFieldPlayerClick}
-        onDropPlayer={handleDropPlayer}
-      />
+    <!-- Main Content: Two-column layout -->
+    <div class="flex gap-4 items-start">
+      <!-- Left Column: Field and Bench -->
+      <div class="flex-1">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
+          <FieldView
+            {sport}
+            {formation}
+            {players}
+            {displayFormat}
+            {substitutingPlayerId}
+            {isPendingMode}
+            onPlayerClick={handleFieldPlayerClick}
+            onDropPlayer={handleDropPlayer}
+          />
 
-      {#if isSubstituting && substitutingPlayer}
-        <SubstitutionPanel
-          {substitutingPlayer}
-          {selectedBenchPlayerId}
+          {#if isSubstituting && substitutingPlayer}
+            <SubstitutionPanel
+              {substitutingPlayer}
+              {selectedBenchPlayerId}
+              {displayFormat}
+              onMoveToBench={handleMoveToBench}
+              onCompleteSubstitution={handleCompleteSubstitution}
+              onCancel={gameStore.cancelSubstitution}
+            />
+          {/if}
+
+          <BenchView
+            {players}
+            {sport}
+            {formationStatus}
+            {displayFormat}
+            selectedPlayerId={selectedBenchPlayerId}
+            {isSubstituting}
+            onSelectPlayer={handleBenchPlayerSelect}
+            onAssignPosition={handleAssignPosition}
+            onDropToBench={handleDropToBench}
+          />
+        </div>
+      </div>
+
+      <!-- Right Column: Roster Sidebar -->
+      <div class="w-80" style="height: calc(100vh - 180px);">
+        <RosterView
+          {players}
           {displayFormat}
-          onMoveToBench={handleMoveToBench}
-          onCompleteSubstitution={handleCompleteSubstitution}
-          onCancel={gameStore.cancelSubstitution}
         />
-      {/if}
-
-      <BenchView
-        {players}
-        {sport}
-        {formationStatus}
-        {displayFormat}
-        selectedPlayerId={selectedBenchPlayerId}
-        {isSubstituting}
-        onSelectPlayer={handleBenchPlayerSelect}
-        onAssignPosition={handleAssignPosition}
-        onDropToBench={handleDropToBench}
-      />
+      </div>
     </div>
   </div>
 </div>
