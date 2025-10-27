@@ -249,6 +249,7 @@
         <RosterView
           {players}
           {displayFormat}
+          {isPendingMode}
         />
       </div>
     </div>

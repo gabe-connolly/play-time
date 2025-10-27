@@ -3,22 +3,77 @@
 
   let {
     players = [],
-    displayFormat = 'full'
+    displayFormat = 'full',
+    isPendingMode = false
   } = $props();
 
-  // Separate players by status
-  const fieldPlayers = $derived(players.filter(p => p.isOnField()).sort((a, b) => {
-    // Sort by position and then by position index
-    if (a.position !== b.position) {
-      return (a.position || '').localeCompare(b.position || '');
-    }
-    return (a.positionIndex || 0) - (b.positionIndex || 0);
-  }));
-  
-  const benchPlayers = $derived(players.filter(p => p.isOnBench()).sort((a, b) => {
-    // Sort alphabetically by last name
+  // Sort all players alphabetically by last name
+  const sortedPlayers = $derived(players.slice().sort((a, b) => {
     return a.lastName.localeCompare(b.lastName);
   }));
+
+  function handleDragStart(e, player) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      playerId: player.id,
+      sourceType: player.isOnBench() ? 'bench' : 'field',
+      sourcePosition: player.position,
+      sourceSlotIndex: player.positionIndex
+    }));
+  }
+
+  // Touch event handlers for mobile support
+  let touchStartData = null;
+
+  function handleTouchStart(e, player) {
+    e.preventDefault();
+    touchStartData = {
+      playerId: player.id,
+      sourceType: player.isOnBench() ? 'bench' : 'field',
+      sourcePosition: player.position,
+      sourceSlotIndex: player.positionIndex,
+      startX: e.touches[0].clientX,
+      startY: e.touches[0].clientY
+    };
+    e.currentTarget.style.opacity = '0.5';
+  }
+
+  function handleTouchMove(e) {
+    if (!touchStartData) return;
+    e.preventDefault();
+  }
+
+  function handleTouchEnd(e) {
+    if (!touchStartData) return;
+    e.preventDefault();
+    
+    // Reset visual feedback
+    e.currentTarget.style.opacity = '';
+    
+    // Find the element at the touch end position
+    const touch = e.changedTouches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (targetElement) {
+      // Find the closest button with data-slot attribute
+      const dropTarget = targetElement.closest('[data-slot-index]');
+      if (dropTarget) {
+        const event = new CustomEvent('rosterPlayerDrop', {
+          detail: {
+            playerId: touchStartData.playerId,
+            sourceType: touchStartData.sourceType,
+            sourcePosition: touchStartData.sourcePosition,
+            sourceSlotIndex: touchStartData.sourceSlotIndex,
+            targetElement: dropTarget
+          },
+          bubbles: true
+        });
+        dropTarget.dispatchEvent(event);
+      }
+    }
+    
+    touchStartData = null;
+  }
 </script>
 
 <div class="h-full flex flex-col bg-white rounded-lg shadow-lg overflow-hidden">
@@ -27,64 +82,49 @@
     <p class="text-sm text-gray-600">Total: {players.length}</p>
   </div>
   
-  <div class="flex-1 overflow-y-auto p-4 space-y-4">
-    <!-- Field Players -->
-    {#if fieldPlayers.length > 0}
-      <div>
-        <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-          On Field ({fieldPlayers.length})
-        </h3>
-        <div class="space-y-1">
-          {#each fieldPlayers as player (player.id)}
-            <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50">
-              <div class="flex-1">
-                <span class="font-medium text-gray-900">
-                  {getDisplayName(player, displayFormat)}
-                </span>
-                {#if player.jerseyNumber}
-                  <span class="text-gray-500 text-sm ml-2">#{player.jerseyNumber}</span>
-                {/if}
-              </div>
-              {#if player.position}
-                <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded font-medium">
-                  {player.position}
-                </span>
-              {/if}
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
-    <!-- Bench Players -->
-    {#if benchPlayers.length > 0}
-      <div>
-        <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-          On Bench ({benchPlayers.length})
-        </h3>
-        <div class="space-y-1">
-          {#each benchPlayers as player (player.id)}
-            <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50">
-              <div class="flex-1">
-                <span class="font-medium text-gray-900">
-                  {getDisplayName(player, displayFormat)}
-                </span>
-                {#if player.jerseyNumber}
-                  <span class="text-gray-500 text-sm ml-2">#{player.jerseyNumber}</span>
-                {/if}
-              </div>
-              <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                Bench
-              </span>
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
+  <div class="flex-1 overflow-y-auto p-4">
     {#if players.length === 0}
       <div class="text-center py-8 text-gray-500">
         <p>No players on the roster</p>
+      </div>
+    {:else}
+      <div class="space-y-1">
+        {#each sortedPlayers as player (player.id)}
+          {@const isOnField = isPendingMode ? (player.pendingPosition !== null) : player.isOnField()}
+          {@const position = isPendingMode ? player.pendingPosition : player.position}
+          
+          <div 
+            class={`flex items-center justify-between p-2 rounded transition-colors cursor-move ${
+              isOnField 
+                ? 'bg-blue-50 border-l-4 border-blue-500 hover:bg-blue-100' 
+                : 'bg-gray-50 hover:bg-gray-100'
+            }`}
+            draggable={true}
+            ondragstart={(e) => handleDragStart(e, player)}
+            ontouchstart={(e) => handleTouchStart(e, player)}
+            ontouchmove={handleTouchMove}
+            ontouchend={handleTouchEnd}
+          >
+            <div class="flex-1">
+              <span class={`font-medium ${isOnField ? 'text-gray-900' : 'text-gray-700'}`}>
+                {getDisplayName(player, displayFormat)}
+              </span>
+              {#if player.jerseyNumber}
+                <span class="text-gray-500 text-sm ml-2">#{player.jerseyNumber}</span>
+              {/if}
+            </div>
+            
+            {#if isOnField && position}
+              <span class="text-xs px-2 py-1 bg-blue-600 text-white rounded font-medium">
+                {position}
+              </span>
+            {:else}
+              <span class="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded">
+                Bench
+              </span>
+            {/if}
+          </div>
+        {/each}
       </div>
     {/if}
   </div>
