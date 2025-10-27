@@ -312,6 +312,20 @@ export function clearPendingPositions() {
 }
 
 /**
+ * Clear a single player's pending position
+ */
+export function clearPlayerPendingPosition(playerId) {
+  if (!team) return;
+
+  const player = team.getPlayer(playerId);
+  if (player) {
+    player.clearPendingPosition();
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
+  }
+}
+
+/**
  * Initialize pending positions from active positions
  */
 export function initializePendingFromActive() {
