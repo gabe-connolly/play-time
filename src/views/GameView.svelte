@@ -14,9 +14,11 @@
   const displayFormat = $derived(gameStore.getDisplayFormat());
   const substitutingPlayerId = $derived(gameStore.getSubstitutingPlayer());
   const selectedBenchPlayerId = $derived(gameStore.getSelectedBenchPlayer());
+  const fieldMode = $derived(gameStore.getFieldMode());
 
   const isSubstituting = $derived(gameStore.isSubstituting());
   const formationStatus = $derived(teamStore.getFormationStatus());
+  const isPendingMode = $derived(fieldMode === 'pending');
 
   const substitutingPlayer = $derived(
     substitutingPlayerId ? team?.getPlayer(substitutingPlayerId) : null
@@ -38,7 +40,28 @@
 
   function handleAssignPosition(positionName) {
     if (selectedBenchPlayerId) {
-      teamStore.assignPlayerToPosition(selectedBenchPlayerId, positionName);
+      // Find the first available slot index in this position
+      const playersInPosition = players.filter(p => 
+        (isPendingMode ? p.pendingPosition : p.position) === positionName
+      );
+      const formationObj = teamStore.getFormation();
+      const totalSlots = formationObj.getPositionCount(positionName);
+      
+      // Find first empty slot
+      let slotIndex = 0;
+      for (let i = 0; i < totalSlots; i++) {
+        const indexKey = isPendingMode ? 'pendingPositionIndex' : 'positionIndex';
+        if (!playersInPosition.find(p => p[indexKey] === i)) {
+          slotIndex = i;
+          break;
+        }
+      }
+      
+      if (isPendingMode) {
+        teamStore.assignPlayerToPendingPosition(selectedBenchPlayerId, positionName, slotIndex);
+      } else {
+        teamStore.assignPlayerToPosition(selectedBenchPlayerId, positionName, slotIndex);
+      }
       gameStore.selectBenchPlayer(null);
     }
   }
@@ -52,9 +75,83 @@
 
   function handleCompleteSubstitution() {
     if (substitutingPlayerId && selectedBenchPlayerId) {
-      teamStore.substitutePlayers(substitutingPlayerId, selectedBenchPlayerId);
+      const onFieldPlayer = team?.getPlayer(substitutingPlayerId);
+      const slotIndex = onFieldPlayer?.positionIndex;
+      teamStore.substitutePlayers(substitutingPlayerId, selectedBenchPlayerId, slotIndex);
       gameStore.cancelSubstitution();
     }
+  }
+
+  function handleDropPlayer(playerId, positionName, slotIndex, replacedPlayerId, sourcePosition, sourceSlotIndex) {
+    if (isPendingMode) {
+      if (replacedPlayerId && replacedPlayerId !== playerId) {
+        // Swap in pending mode - need to update both players
+        const draggedPlayer = team?.getPlayer(playerId);
+        const replacedPlayer = team?.getPlayer(replacedPlayerId);
+        
+        if (draggedPlayer && replacedPlayer) {
+          // Store replaced player's position info
+          const tempPosition = replacedPlayer.pendingPosition;
+          const tempSlotIndex = replacedPlayer.pendingPositionIndex;
+          
+          // Move replaced player to dragged player's original position
+          if (draggedPlayer.pendingPosition) {
+            replacedPlayer.assignToPendingPosition(draggedPlayer.pendingPosition, draggedPlayer.pendingPositionIndex);
+          } else {
+            replacedPlayer.clearPendingPosition();
+          }
+          
+          // Move dragged player to target position
+          draggedPlayer.assignToPendingPosition(positionName, slotIndex);
+          
+          // Manually trigger reactivity by reassigning team
+          const currentTeam = teamStore.getTeam();
+          if (currentTeam) {
+            teamStore.assignPlayerToPendingPosition(playerId, positionName, slotIndex);
+            if (tempPosition) {
+              teamStore.assignPlayerToPendingPosition(replacedPlayerId, tempPosition, tempSlotIndex);
+            }
+          }
+        }
+      } else {
+        // Just assign to the specific slot in pending mode
+        teamStore.assignPlayerToPendingPosition(playerId, positionName, slotIndex);
+      }
+    } else {
+      // Active mode
+      const draggedPlayer = team?.getPlayer(playerId);
+      
+      if (replacedPlayerId && replacedPlayerId !== playerId) {
+        // Swap players between slots
+        teamStore.swapFieldPlayers(playerId, replacedPlayerId);
+      } else if (draggedPlayer?.isOnBench()) {
+        // Assign bench player to specific slot
+        teamStore.assignPlayerToPosition(playerId, positionName, slotIndex);
+      } else if (draggedPlayer?.isOnField()) {
+        // Move player to different slot (same or different position)
+        teamStore.assignPlayerToPosition(playerId, positionName, slotIndex);
+      }
+    }
+  }
+
+  function handleDropToBench(playerId) {
+    if (!isPendingMode) {
+      teamStore.movePlayerToBench(playerId);
+    }
+  }
+
+  function handleFieldModeToggle() {
+    const newMode = fieldMode === 'active' ? 'pending' : 'active';
+    
+    if (newMode === 'active' && fieldMode === 'pending') {
+      // Apply pending positions (move pending to active)
+      teamStore.applyPendingPositions();
+    } else if (newMode === 'pending') {
+      // Copy current positions to pending for editing
+      teamStore.initializePendingFromActive();
+    }
+    
+    gameStore.setFieldMode(newMode);
   }
 </script>
 
@@ -71,7 +168,30 @@
         <h1 class="text-2xl font-bold text-gray-800">
           {sport?.name} - {formation?.name}
         </h1>
-        <div class="w-32"></div>
+        <div class="flex gap-2">
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              fieldMode === 'active'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            onclick={handleFieldModeToggle}
+            disabled={fieldMode === 'active'}
+          >
+            Active
+          </button>
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              fieldMode === 'pending'
+                ? 'bg-orange-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            onclick={handleFieldModeToggle}
+            disabled={fieldMode === 'pending'}
+          >
+            Pending
+          </button>
+        </div>
       </div>
 
       <FieldView
@@ -80,7 +200,9 @@
         {players}
         {displayFormat}
         {substitutingPlayerId}
+        {isPendingMode}
         onPlayerClick={handleFieldPlayerClick}
+        onDropPlayer={handleDropPlayer}
       />
 
       {#if isSubstituting && substitutingPlayer}
@@ -103,6 +225,7 @@
         {isSubstituting}
         onSelectPlayer={handleBenchPlayerSelect}
         onAssignPosition={handleAssignPosition}
+        onDropToBench={handleDropToBench}
       />
     </div>
   </div>

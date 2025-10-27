@@ -9,13 +9,28 @@
     selectedPlayerId = null,
     isSubstituting = false,
     onSelectPlayer,
-    onAssignPosition
+    onAssignPosition,
+    onDropToBench = null
   } = $props();
 
   const benchPlayers = $derived(players.filter(p => p.isOnBench()));
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    const data = JSON.parse(e.dataTransfer.getData('application/json'));
+    
+    if (data.sourceType === 'field' && onDropToBench) {
+      onDropToBench(data.playerId);
+    }
+  }
 </script>
 
-<div class="bg-gray-50 rounded-lg p-4">
+<div class="bg-gray-50 rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop}>
   <h2 class="text-xl font-bold mb-3">Bench ({benchPlayers.length})</h2>
 
   {#if benchPlayers.length === 0}
@@ -28,6 +43,7 @@
           {displayFormat}
           isSelected={selectedPlayerId === player.id}
           onSelect={onSelectPlayer}
+          draggable={!isSubstituting}
         />
       {/each}
     </div>

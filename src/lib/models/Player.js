@@ -11,7 +11,10 @@ export class Player {
     nickname = '',
     jerseyNumber = '',
     status = 'on_bench',
-    position = null
+    position = null,
+    positionIndex = null,
+    pendingPosition = null,
+    pendingPositionIndex = null
   }) {
     this.id = id;
     this.firstName = firstName;
@@ -20,6 +23,9 @@ export class Player {
     this.jerseyNumber = jerseyNumber;
     this.status = status; // 'on_field' | 'on_bench'
     this.position = position; // Position name or null
+    this.positionIndex = positionIndex; // Slot index within position (0-based) or null
+    this.pendingPosition = pendingPosition; // Pending position name or null
+    this.pendingPositionIndex = pendingPositionIndex; // Pending slot index or null
   }
 
   /**
@@ -56,9 +62,11 @@ export class Player {
   /**
    * Assign player to a position
    * @param {string} positionName
+   * @param {number|null} slotIndex - Optional slot index within position
    */
-  assignToPosition(positionName) {
+  assignToPosition(positionName, slotIndex = null) {
     this.position = positionName;
+    this.positionIndex = slotIndex;
     this.status = 'on_field';
   }
 
@@ -67,7 +75,42 @@ export class Player {
    */
   moveToBench() {
     this.position = null;
+    this.positionIndex = null;
     this.status = 'on_bench';
+  }
+
+  /**
+   * Assign player to a pending position
+   * @param {string} positionName
+   * @param {number|null} slotIndex - Optional slot index within position
+   */
+  assignToPendingPosition(positionName, slotIndex = null) {
+    this.pendingPosition = positionName;
+    this.pendingPositionIndex = slotIndex;
+  }
+
+  /**
+   * Clear pending position
+   */
+  clearPendingPosition() {
+    this.pendingPosition = null;
+    this.pendingPositionIndex = null;
+  }
+
+  /**
+   * Apply pending position (move pending to active)
+   */
+  applyPendingPosition() {
+    if (this.pendingPosition !== null) {
+      this.position = this.pendingPosition;
+      this.positionIndex = this.pendingPositionIndex;
+      this.status = 'on_field';
+      this.pendingPosition = null;
+      this.pendingPositionIndex = null;
+    } else {
+      // If no pending position, move to bench
+      this.moveToBench();
+    }
   }
 
   /**
@@ -82,7 +125,10 @@ export class Player {
       nickname: this.nickname,
       jerseyNumber: this.jerseyNumber,
       status: this.status,
-      position: this.position
+      position: this.position,
+      positionIndex: this.positionIndex,
+      pendingPosition: this.pendingPosition,
+      pendingPositionIndex: this.pendingPositionIndex
     };
   }
 

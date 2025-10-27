@@ -127,12 +127,12 @@ export function deletePlayer(playerId) {
 /**
  * Assign player to position
  */
-export function assignPlayerToPosition(playerId, positionName) {
+export function assignPlayerToPosition(playerId, positionName, slotIndex = null) {
   if (!team) return;
 
   const player = team.getPlayer(playerId);
   if (player) {
-    player.assignToPosition(positionName);
+    player.assignToPosition(positionName, slotIndex);
     // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
   }
@@ -155,7 +155,7 @@ export function movePlayerToBench(playerId) {
 /**
  * Substitute players
  */
-export function substitutePlayers(onFieldPlayerId, benchPlayerId) {
+export function substitutePlayers(onFieldPlayerId, benchPlayerId, targetSlotIndex = null) {
   if (!team) return;
 
   const onFieldPlayer = team.getPlayer(onFieldPlayerId);
@@ -163,8 +163,31 @@ export function substitutePlayers(onFieldPlayerId, benchPlayerId) {
 
   if (onFieldPlayer && benchPlayer) {
     const position = onFieldPlayer.position;
+    const slotIndex = targetSlotIndex !== null ? targetSlotIndex : onFieldPlayer.positionIndex;
     onFieldPlayer.moveToBench();
-    benchPlayer.assignToPosition(position);
+    benchPlayer.assignToPosition(position, slotIndex);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
+  }
+}
+
+/**
+ * Swap two players on the field
+ */
+export function swapFieldPlayers(player1Id, player2Id) {
+  if (!team) return;
+
+  const player1 = team.getPlayer(player1Id);
+  const player2 = team.getPlayer(player2Id);
+
+  if (player1 && player2 && player1.isOnField() && player2.isOnField()) {
+    // Swap positions and slot indices
+    const tempPosition = player1.position;
+    const tempSlotIndex = player1.positionIndex;
+    
+    player1.assignToPosition(player2.position, player2.positionIndex);
+    player2.assignToPosition(tempPosition, tempSlotIndex);
+    
     // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
   }
@@ -224,4 +247,61 @@ export function getBenchPlayers() {
  */
 export function getFormationStatus() {
   return team && formation ? team.getFormationStatus(formation) : {};
+}
+
+/**
+ * Assign player to pending position
+ */
+export function assignPlayerToPendingPosition(playerId, positionName, slotIndex = null) {
+  if (!team) return;
+
+  const player = team.getPlayer(playerId);
+  if (player) {
+    player.assignToPendingPosition(positionName, slotIndex);
+    // Create a new Team instance to trigger reactivity
+    team = Team.fromJSON(team.toJSON());
+  }
+}
+
+/**
+ * Apply all pending positions (swap to pending field)
+ */
+export function applyPendingPositions() {
+  if (!team) return;
+
+  team.players.forEach(player => {
+    player.applyPendingPosition();
+  });
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
+}
+
+/**
+ * Clear all pending positions
+ */
+export function clearPendingPositions() {
+  if (!team) return;
+
+  team.players.forEach(player => {
+    player.clearPendingPosition();
+  });
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
+}
+
+/**
+ * Initialize pending positions from active positions
+ */
+export function initializePendingFromActive() {
+  if (!team) return;
+
+  team.players.forEach(player => {
+    if (player.isOnField()) {
+      player.assignToPendingPosition(player.position, player.positionIndex);
+    } else {
+      player.clearPendingPosition();
+    }
+  });
+  // Create a new Team instance to trigger reactivity
+  team = Team.fromJSON(team.toJSON());
 }

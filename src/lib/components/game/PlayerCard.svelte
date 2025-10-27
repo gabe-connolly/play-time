@@ -7,21 +7,85 @@
     displayFormat = 'full',
     isSelected = false,
     showActions = false,
+    draggable = false,
     onSelect = null,
     onEdit = null,
     onDelete = null
   } = $props();
+
+  function handleDragStart(e) {
+    if (!draggable) return;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({
+      playerId: player.id,
+      sourceType: 'bench'
+    }));
+  }
+
+  // Touch event handlers for mobile support
+  let touchStartData = null;
+
+  function handleTouchStart(e) {
+    if (!draggable) return;
+    e.preventDefault();
+    touchStartData = {
+      playerId: player.id,
+      sourceType: 'bench',
+      startX: e.touches[0].clientX,
+      startY: e.touches[0].clientY
+    };
+    e.currentTarget.style.opacity = '0.5';
+  }
+
+  function handleTouchMove(e) {
+    if (!touchStartData) return;
+    e.preventDefault();
+  }
+
+  function handleTouchEnd(e) {
+    if (!touchStartData) return;
+    e.preventDefault();
+    
+    // Reset visual feedback
+    e.currentTarget.style.opacity = '';
+    
+    // Find the element at the touch end position
+    const touch = e.changedTouches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (targetElement) {
+      // Find the closest button with data-slot attribute
+      const dropTarget = targetElement.closest('[data-slot-index]');
+      if (dropTarget) {
+        const event = new CustomEvent('benchPlayerDrop', {
+          detail: {
+            playerId: touchStartData.playerId,
+            targetElement: dropTarget
+          },
+          bubbles: true
+        });
+        dropTarget.dispatchEvent(event);
+      }
+    }
+    
+    touchStartData = null;
+  }
 </script>
 
 <div
   class={`flex items-center justify-between p-3 rounded-lg transition-colors ${
     onSelect ? 'cursor-pointer' : ''
-  } ${
+  } ${draggable ? 'cursor-move' : ''} ${
     isSelected ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50 hover:bg-gray-100'
   }`}
   onclick={() => onSelect?.(player.id)}
   role={onSelect ? 'button' : 'presentation'}
-  tabindex={onSelect ? 0 : -1}
+  tabindex={onSelect ? 0 : undefined}
+  draggable={draggable}
+  ondragstart={handleDragStart}
+  ontouchstart={handleTouchStart}
+  ontouchmove={handleTouchMove}
+  ontouchend={handleTouchEnd}
 >
   <div>
     <span class="font-medium">{getDisplayName(player, displayFormat)}</span>
