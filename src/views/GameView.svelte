@@ -164,50 +164,46 @@
 
 <div class="min-h-screen bg-gray-100 p-4">
   <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
-      <div class="flex items-center justify-between">
-        <button
-          class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-          onclick={gameStore.goToSetup}
-        >
-          <ChevronLeft size={20} /> Back to Setup
-        </button>
-        <h1 class="text-2xl font-bold text-gray-800">
-          {sport?.name} - {formation?.name}
-        </h1>
-        <div class="flex gap-2">
-          <button
-            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              fieldMode === 'active'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            onclick={handleFieldModeToggle}
-            disabled={fieldMode === 'active'}
-          >
-            Active
-          </button>
-          <button
-            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              fieldMode === 'pending'
-                ? 'bg-orange-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-            onclick={handleFieldModeToggle}
-            disabled={fieldMode === 'pending'}
-          >
-            Pending
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content: Two-column layout -->
     <div class="flex gap-4 items-start">
-      <!-- Left Column: Field and Bench -->
+      <!-- Main Content -->
       <div class="flex-1">
         <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
+          <div class="flex items-center justify-between mb-6">
+            <button
+              class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              onclick={gameStore.goToSetup}
+            >
+              <ChevronLeft size={20} /> Back to Setup
+            </button>
+            <h1 class="text-2xl font-bold text-gray-800">
+              {sport?.name} - {formation?.name}
+            </h1>
+            <div class="flex gap-2">
+              <button
+                class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  fieldMode === 'active'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                onclick={handleFieldModeToggle}
+                disabled={fieldMode === 'active'}
+              >
+                Active
+              </button>
+              <button
+                class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  fieldMode === 'pending'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                onclick={handleFieldModeToggle}
+                disabled={fieldMode === 'pending'}
+              >
+                Pending
+              </button>
+            </div>
+          </div>
+
           <FieldView
             {sport}
             {formation}
