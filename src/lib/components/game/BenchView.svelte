@@ -30,7 +30,7 @@
   }
 </script>
 
-<div class="bg-gray-50 rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop}>
+<div class="bg-white rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop} role="region" aria-label="Bench drop zone">
   <h2 class="text-xl font-bold mb-3">Bench ({benchPlayers.length})</h2>
 
   {#if benchPlayers.length === 0}
