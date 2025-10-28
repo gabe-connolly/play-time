@@ -84,7 +84,7 @@ describe('ComponentName', () => {
 
 ## Important Notes
 
-- **Node version**: Project requires Node.js >= 22.0.0 (though it works with 20.x)
+- **Node version**: Project requires Node.js >= 22.0.0
 - **Svelte 5**: Use the runes API, not the legacy reactive syntax
 - **Accessibility**: Address a11y warnings (ARIA roles, tabindex) when working with interactive elements
 - **Build warnings**: The project has a known warning about missing `.svelte-kit/tsconfig.json` - this is expected in the initial setup
@@ -94,6 +94,7 @@ describe('ComponentName', () => {
 ### Creating a Player
 ```javascript
 import { Player } from '$lib/models/Player.js';
+import { generateId } from '$lib/utils/idGenerator.js';
 
 const player = new Player({
   id: generateId(),
