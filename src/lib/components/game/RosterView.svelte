@@ -62,7 +62,7 @@
   }
 </script>
 
-<div class="bg-gray-50 rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop} role="region" aria-label="Full Roster drop zone">
+<div class="bg-white rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop} role="region" aria-label="Full Roster drop zone">
   <h2 class="text-xl font-bold mb-3">Full Roster ({rosterPlayers.length})</h2>
 
   {#if rosterPlayers.length === 0}
