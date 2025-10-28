@@ -8,6 +8,7 @@ let displayFormat = $state('full'); // 'full' | 'nickname' | 'last'
 let substituting = $state(null); // Player ID being substituted
 let selectedBenchPlayer = $state(null); // Selected bench player for substitution
 let fieldMode = $state('active'); // 'active' | 'pending'
+let playerListView = $state('bench'); // 'bench' | 'roster'
 
 /**
  * Navigate to setup view
@@ -17,6 +18,7 @@ export function goToSetup() {
   substituting = null;
   selectedBenchPlayer = null;
   fieldMode = 'active';
+  playerListView = 'bench';
 }
 
 /**
@@ -110,4 +112,18 @@ export function getFieldMode() {
  */
 export function isPendingMode() {
   return fieldMode === 'pending';
+}
+
+/**
+ * Set player list view (bench or roster)
+ */
+export function setPlayerListView(view) {
+  playerListView = view;
+}
+
+/**
+ * Get player list view (reactive)
+ */
+export function getPlayerListView() {
+  return playerListView;
 }
