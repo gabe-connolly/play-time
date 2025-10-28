@@ -8,6 +8,7 @@
     isSelected = false,
     showActions = false,
     draggable = false,
+    sourceType = 'bench',
     onSelect = null,
     onEdit = null,
     onDelete = null
@@ -18,7 +19,7 @@
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('application/json', JSON.stringify({
       playerId: player.id,
-      sourceType: 'bench'
+      sourceType: sourceType
     }));
   }
 
@@ -30,7 +31,7 @@
     e.preventDefault();
     touchStartData = {
       playerId: player.id,
-      sourceType: 'bench',
+      sourceType: sourceType,
       startX: e.touches[0].clientX,
       startY: e.touches[0].clientY
     };

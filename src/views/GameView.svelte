@@ -2,6 +2,7 @@
   import { ChevronLeft } from 'lucide-svelte';
   import FieldView from '$lib/components/game/FieldView.svelte';
   import BenchView from '$lib/components/game/BenchView.svelte';
+  import RosterView from '$lib/components/game/RosterView.svelte';
   import SubstitutionPanel from '$lib/components/game/SubstitutionPanel.svelte';
   import Button from '$lib/components/shared/Button.svelte';
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
@@ -15,6 +16,7 @@
   const substitutingPlayerId = $derived(gameStore.getSubstitutingPlayer());
   const selectedBenchPlayerId = $derived(gameStore.getSelectedBenchPlayer());
   const fieldMode = $derived(gameStore.getFieldMode());
+  const playerListView = $derived(gameStore.getPlayerListView());
 
   const isSubstituting = $derived(gameStore.isSubstituting());
   const formationStatus = $derived(teamStore.getFormationStatus());
@@ -222,17 +224,51 @@
         />
       {/if}
 
-      <BenchView
-        {players}
-        {sport}
-        {formationStatus}
-        {displayFormat}
-        selectedPlayerId={selectedBenchPlayerId}
-        {isSubstituting}
-        onSelectPlayer={handleBenchPlayerSelect}
-        onAssignPosition={handleAssignPosition}
-        onDropToBench={handleDropToBench}
-      />
+      <div class="mb-4">
+        <div class="flex gap-2 mb-3">
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              playerListView === 'bench'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            onclick={() => gameStore.setPlayerListView('bench')}
+          >
+            Bench View
+          </button>
+          <button
+            class={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              playerListView === 'roster'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            onclick={() => gameStore.setPlayerListView('roster')}
+          >
+            Full Roster
+          </button>
+        </div>
+
+        {#if playerListView === 'bench'}
+          <BenchView
+            {players}
+            {sport}
+            {formationStatus}
+            {displayFormat}
+            selectedPlayerId={selectedBenchPlayerId}
+            {isSubstituting}
+            onSelectPlayer={handleBenchPlayerSelect}
+            onAssignPosition={handleAssignPosition}
+            onDropToBench={handleDropToBench}
+          />
+        {:else}
+          <RosterView
+            {players}
+            {displayFormat}
+            {fieldMode}
+            onDropToBench={handleDropToBench}
+          />
+        {/if}
+      </div>
     </div>
   </div>
 </div>
