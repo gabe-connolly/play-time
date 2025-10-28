@@ -1,6 +1,5 @@
 <script>
   import PlayerCard from './PlayerCard.svelte';
-  import { getDisplayName } from '$lib/utils/displayName.js';
 
   let {
     players,
@@ -50,10 +49,15 @@
 
   function handleDrop(e) {
     e.preventDefault();
-    const data = JSON.parse(e.dataTransfer.getData('application/json'));
     
-    if (data.sourceType === 'field' && onDropToBench) {
-      onDropToBench(data.playerId);
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('application/json'));
+      
+      if (data.sourceType === 'field' && onDropToBench) {
+        onDropToBench(data.playerId);
+      }
+    } catch (error) {
+      console.error('Failed to parse drag data:', error);
     }
   }
 </script>
