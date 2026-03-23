@@ -5,6 +5,8 @@
     players,
     displayFormat = 'full',
     fieldMode = 'active',
+    showPlayTime = false,
+    playTimeTick = 0,
     onDropToBench = null
   } = $props();
 
@@ -68,23 +70,25 @@
   {#if rosterPlayers.length === 0}
     <p class="text-gray-500 text-center py-4">No players in roster</p>
   {:else}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <div class="grid grid-cols-1 gap-2">
       {#each rosterPlayers as player (player.id)}
         {@const badges = getAssignmentBadges(player)}
         {@const hasAssignment = badges.length > 0}
-        
-        <div class="relative">
+
+        <div>
           <PlayerCard
             {player}
             {displayFormat}
+            {showPlayTime}
+            {playTimeTick}
             draggable={true}
             sourceType="roster"
           />
-          
+
           {#if hasAssignment}
-            <div class="absolute top-1 right-1 flex flex-col gap-1">
+            <div class="flex flex-wrap gap-1 mt-1 ml-3">
               {#each badges as badge}
-                <span class={`text-xs px-2 py-0.5 rounded ${badge.color} font-medium shadow-sm`}>
+                <span class={`text-xs px-2 py-0.5 rounded ${badge.color} font-medium`}>
                   {badge.label}
                 </span>
               {/each}

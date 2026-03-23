@@ -12,8 +12,14 @@ export default {
       pages: 'dist',
       assets: 'dist',
       fallback: 'index.html',
-      precompress: false,
+      precompress: true,
       strict: true
-    })
+    }),
+    serviceWorker: {
+      register: false
+    },
+    version: {
+      name: Date.now().toString()
+    }
   }
 }

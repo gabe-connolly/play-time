@@ -8,8 +8,14 @@
     displayFormat = 'full',
     substitutingPlayerId = null,
     isPendingMode = false,
+    hasPendingWork = false,
     onPlayerClick,
-    onDropPlayer = null
+    onDropPlayer = null,
+    onViewActive = null,
+    onViewPending = null,
+    onPrepareSubs = null,
+    onCommitSubs = null,
+    onDiscardSubs = null
   } = $props();
 
   const fieldPlayers = $derived(
@@ -43,9 +49,65 @@
 
 <div class="bg-green-600 rounded-lg p-6 mb-6">
   <div class="bg-green-500 rounded-lg p-4">
-    <h2 class="text-white text-xl font-bold mb-4 text-center">
-      {isPendingMode ? 'Pending Field' : 'Field'}
-    </h2>
+    <div class="flex items-center justify-between mb-4">
+      <!-- Left: label -->
+      <h2 class="text-white text-lg font-bold w-28">
+        {isPendingMode ? 'Pending' : 'Field'}
+      </h2>
+
+      <!-- Center: view toggle -->
+      <div>
+        {#if hasPendingWork}
+          <div class="flex rounded-lg overflow-hidden border border-white/30">
+            <button
+              class={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                !isPendingMode
+                  ? 'bg-white text-green-800'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+              onclick={onViewActive}
+            >
+              Active
+            </button>
+            <button
+              class={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                isPendingMode
+                  ? 'bg-white text-orange-700'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+              onclick={onViewPending}
+            >
+              Pending
+            </button>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Right: sub actions -->
+      <div class="w-28 flex justify-end gap-1.5">
+        {#if hasPendingWork}
+          <button
+            class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/90 text-green-800 hover:bg-white transition-colors"
+            onclick={onCommitSubs}
+          >
+            Sub Now
+          </button>
+          <button
+            class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/20 text-white hover:bg-white/30 transition-colors"
+            onclick={onDiscardSubs}
+          >
+            Discard
+          </button>
+        {:else}
+          <button
+            class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/20 text-white hover:bg-white/30 transition-colors"
+            onclick={onPrepareSubs}
+          >
+            Prepare Subs
+          </button>
+        {/if}
+      </div>
+    </div>
     <div class="space-y-4">
       {#each positionGroups as group (group.position.name)}
         <PositionGroup

@@ -8,6 +8,13 @@
   import * as teamStore from '$lib/stores/teamStore.svelte.js';
   import * as gameStore from '$lib/stores/gameStore.svelte.js';
 
+  function handleClearData() {
+    if (confirm('Clear all data? This will reset the app completely.')) {
+      teamStore.resetAllData();
+      gameStore.resetGameState();
+    }
+  }
+
   const team = $derived(teamStore.getTeam());
   const sport = $derived(teamStore.getSport());
   const teamSize = $derived(teamStore.getTeamSize());
@@ -90,6 +97,15 @@
           <span class="text-lg">Start Game →</span>
         </Button>
       {/if}
+    </div>
+
+    <div class="text-center py-4">
+      <button
+        class="text-sm text-red-400 hover:text-red-600 underline"
+        onclick={handleClearData}
+      >
+        Clear All Data
+      </button>
     </div>
   </div>
 </div>

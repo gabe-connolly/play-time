@@ -80,7 +80,9 @@ describe('Player Model', () => {
       ...playerData,
       positionIndex: null,
       pendingPosition: null,
-      pendingPositionIndex: null
+      pendingPositionIndex: null,
+      playTimeMs: 0,
+      fieldEntryTime: null
     });
   });
 

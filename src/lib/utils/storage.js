@@ -3,6 +3,7 @@
  */
 
 const STORAGE_KEY = 'field_coach_team';
+const GAME_STATE_KEY = 'field_coach_game_state';
 
 /**
  * Save team to localStorage
@@ -42,6 +43,48 @@ export function clearTeam() {
     return true;
   } catch (error) {
     console.error('Error clearing team:', error);
+    return false;
+  }
+}
+
+/**
+ * Save game state to localStorage
+ * @param {Object} state
+ */
+export function saveGameState(state) {
+  try {
+    localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state));
+    return true;
+  } catch (error) {
+    console.error('Error saving game state:', error);
+    return false;
+  }
+}
+
+/**
+ * Load game state from localStorage
+ * @returns {Object|null}
+ */
+export function loadGameState() {
+  try {
+    const data = localStorage.getItem(GAME_STATE_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading game state:', error);
+    return null;
+  }
+}
+
+/**
+ * Clear all app data from localStorage
+ */
+export function clearAllData() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(GAME_STATE_KEY);
+    return true;
+  } catch (error) {
+    console.error('Error clearing data:', error);
     return false;
   }
 }

@@ -26,3 +26,16 @@ build
 *.njsproj
 *.sln
 *.sw?
+
+# AI tooling (local settings, not shared)
+.claude/settings.local.json
+
+# Test coverage
+coverage
+
+# Environment variables
+.env
+.env.*
+
+# OS files
+Thumbs.db

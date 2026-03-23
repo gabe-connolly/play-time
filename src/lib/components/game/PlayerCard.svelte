@@ -1,18 +1,27 @@
 <script>
   import { Edit2, X } from 'lucide-svelte';
   import { getDisplayName } from '$lib/utils/displayName.js';
+  import { formatPlayTime } from '$lib/utils/formatTime.js';
 
   let {
     player,
     displayFormat = 'full',
     isSelected = false,
     showActions = false,
+    showPlayTime = false,
+    playTimeTick = 0,
     draggable = false,
     sourceType = 'bench',
     onSelect = null,
     onEdit = null,
     onDelete = null
   } = $props();
+
+  const currentPlayTime = $derived.by(() => {
+    // Reference playTimeTick to re-derive when it changes
+    void playTimeTick;
+    return showPlayTime ? player.getCurrentPlayTimeMs() : 0;
+  });
 
   function handleDragStart(e) {
     if (!draggable) return;
@@ -88,13 +97,20 @@
   ontouchmove={handleTouchMove}
   ontouchend={handleTouchEnd}
 >
-  <div>
-    <span class="font-medium">{getDisplayName(player, displayFormat)}</span>
-    {#if player.jerseyNumber}
-      <span class="text-gray-500 ml-2">#{player.jerseyNumber}</span>
-    {/if}
-    {#if player.nickname && displayFormat !== 'nickname'}
-      <span class="text-gray-500 text-sm ml-2">({player.nickname})</span>
+  <div class="flex items-center gap-2">
+    <div>
+      <span class="font-medium">{getDisplayName(player, displayFormat)}</span>
+      {#if player.jerseyNumber}
+        <span class="text-gray-500 ml-2">#{player.jerseyNumber}</span>
+      {/if}
+      {#if player.nickname && displayFormat !== 'nickname'}
+        <span class="text-gray-500 text-sm ml-2">({player.nickname})</span>
+      {/if}
+    </div>
+    {#if showPlayTime}
+      <span class="text-xs font-mono tabular-nums px-1.5 py-0.5 rounded {player.isOnField() ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}">
+        {formatPlayTime(currentPlayTime)}
+      </span>
     {/if}
   </div>
 

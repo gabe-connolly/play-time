@@ -8,6 +8,8 @@
     displayFormat = 'full',
     selectedPlayerId = null,
     isSubstituting = false,
+    showPlayTime = false,
+    playTimeTick = 0,
     onSelectPlayer,
     onAssignPosition,
     onDropToBench = null
@@ -36,12 +38,14 @@
   {#if benchPlayers.length === 0}
     <p class="text-gray-500 text-center py-4">All players are on the field</p>
   {:else}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
+    <div class="grid grid-cols-1 gap-2 mb-4">
       {#each benchPlayers as player (player.id)}
         <PlayerCard
           {player}
           {displayFormat}
           isSelected={selectedPlayerId === player.id}
+          {showPlayTime}
+          {playTimeTick}
           onSelect={onSelectPlayer}
           draggable={!isSubstituting}
         />

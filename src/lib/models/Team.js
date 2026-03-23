@@ -4,6 +4,7 @@
  */
 
 import { Player } from './Player.js';
+import { Formation } from './Formation.js';
 
 export class Team {
   constructor({
@@ -21,7 +22,9 @@ export class Team {
     this.sportId = sportId;
     this.teamSize = teamSize;
     this.players = players.map(p => p instanceof Player ? p : Player.fromJSON(p));
-    this.activeFormation = activeFormation;
+    this.activeFormation = activeFormation instanceof Formation
+      ? activeFormation
+      : activeFormation ? new Formation(activeFormation) : null;
   }
 
   /**
@@ -119,12 +122,14 @@ export class Team {
    * @param {Formation} formation
    * @returns {Object} Status for each position
    */
-  getFormationStatus(formation) {
+  getFormationStatus(formation, pending = false) {
     if (!formation) return {};
 
     const status = {};
     for (const [position, needed] of Object.entries(formation.positions)) {
-      const current = this.getPlayersByPosition(position).length;
+      const current = pending
+        ? this.players.filter(p => p.pendingPosition === position).length
+        : this.getPlayersByPosition(position).length;
       status[position] = {
         current,
         needed,

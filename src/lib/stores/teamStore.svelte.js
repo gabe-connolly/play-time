@@ -1,11 +1,12 @@
 /**
  * Team Store - Manages team state using Svelte 5 Runes
  */
-import { saveTeam, loadTeam } from '../utils/storage.js';
+import { saveTeam, loadTeam, clearAllData } from '../utils/storage.js';
 import { Team } from '$lib/models/Team.js';
 import { Player } from '$lib/models/Player.js';
 import { generateId } from '$lib/utils/idGenerator.js';
 import { getSportById } from '$lib/config/sports.js';
+import { getClockRunning } from '$lib/stores/gameStore.svelte.js';
 
 // Create reactive state using $state rune
 let team = $state(null);
@@ -13,7 +14,11 @@ let sport = $state(null);
 let teamSize = $state(11);
 let formation = $state(null);
 
-
+function persist() {
+  if (team) {
+    saveTeam(team);
+  }
+}
 
 export function restoreTeam() {
   const savedData = loadTeam();
@@ -43,6 +48,7 @@ export function initializeTeam(selectedSport, size = 11) {
     players: [],
     activeFormation: formation
   });
+  persist();
 }
 
 /**
@@ -53,7 +59,7 @@ export function setSport(selectedSport) {
   const defaultSize = selectedSport.maxPlayers;
   teamSize = defaultSize;
   formation = selectedSport.getFormationsForTeamSize(defaultSize)[0];
-  
+
   // Initialize team if not already initialized
   if (!team) {
     team = new Team({
@@ -65,6 +71,7 @@ export function setSport(selectedSport) {
       activeFormation: formation
     });
   }
+  persist();
 }
 
 /**
@@ -76,6 +83,7 @@ export function setTeamSize(size) {
     const formations = sport.getFormationsForTeamSize(size);
     formation = formations[0] || null;
   }
+  persist();
 }
 
 /**
@@ -86,6 +94,7 @@ export function setFormation(newFormation) {
   if (team) {
     team.activeFormation = newFormation;
   }
+  persist();
 }
 
 /**
@@ -94,8 +103,8 @@ export function setFormation(newFormation) {
 export function setTeamName(name) {
   if (team) {
     team.name = name;
-    // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -105,8 +114,8 @@ export function setTeamName(name) {
 export function setTeamDescription(description) {
   if (team) {
     team.description = description;
-    // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -122,8 +131,8 @@ export function addPlayer(playerData) {
   });
 
   team.addPlayer(player);
-  // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
+  persist();
 }
 
 /**
@@ -132,8 +141,8 @@ export function addPlayer(playerData) {
 export function updatePlayer(playerId, updates) {
   if (!team) return;
   team.updatePlayer(playerId, updates);
-  // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
+  persist();
 }
 
 /**
@@ -142,8 +151,8 @@ export function updatePlayer(playerId, updates) {
 export function deletePlayer(playerId) {
   if (!team) return;
   team.removePlayer(playerId);
-  // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
+  persist();
 }
 
 /**
@@ -155,8 +164,11 @@ export function assignPlayerToPosition(playerId, positionName, slotIndex = null)
   const player = team.getPlayer(playerId);
   if (player) {
     player.assignToPosition(positionName, slotIndex);
-    // Create a new Team instance to trigger reactivity
+    if (getClockRunning() && player.fieldEntryTime === null) {
+      player.fieldEntryTime = Date.now();
+    }
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -169,8 +181,8 @@ export function movePlayerToBench(playerId) {
   const player = team.getPlayer(playerId);
   if (player) {
     player.moveToBench();
-    // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -188,8 +200,11 @@ export function substitutePlayers(onFieldPlayerId, benchPlayerId, targetSlotInde
     const slotIndex = targetSlotIndex !== null ? targetSlotIndex : onFieldPlayer.positionIndex;
     onFieldPlayer.moveToBench();
     benchPlayer.assignToPosition(position, slotIndex);
-    // Create a new Team instance to trigger reactivity
+    if (getClockRunning() && benchPlayer.fieldEntryTime === null) {
+      benchPlayer.fieldEntryTime = Date.now();
+    }
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -203,72 +218,121 @@ export function swapFieldPlayers(player1Id, player2Id) {
   const player2 = team.getPlayer(player2Id);
 
   if (player1 && player2 && player1.isOnField() && player2.isOnField()) {
-    // Swap positions and slot indices
     const tempPosition = player1.position;
     const tempSlotIndex = player1.positionIndex;
-    
+
     player1.assignToPosition(player2.position, player2.positionIndex);
     player2.assignToPosition(tempPosition, tempSlotIndex);
-    
-    // Create a new Team instance to trigger reactivity
+
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
 /**
- * Get current team state (reactive)
+ * Commit substitution: apply pending lineup as active, clear pending
  */
+export function commitSubstitution() {
+  if (!team) return;
+
+  const clockOn = getClockRunning();
+  const now = Date.now();
+  team.players.forEach(player => {
+    player.applyPendingPosition();
+    if (clockOn && player.isOnField() && player.fieldEntryTime === null) {
+      player.fieldEntryTime = now;
+    }
+  });
+  team = Team.fromJSON(team.toJSON());
+  persist();
+}
+
+/**
+ * Start the game clock — set fieldEntryTime for all on-field players
+ */
+export function startClock() {
+  if (!team) return;
+  const now = Date.now();
+  team.players.forEach(player => {
+    if (player.isOnField() && player.fieldEntryTime === null) {
+      player.fieldEntryTime = now;
+    }
+  });
+  team = Team.fromJSON(team.toJSON());
+  persist();
+}
+
+/**
+ * Stop the game clock — accumulate time for all on-field players
+ */
+export function stopClock() {
+  if (!team) return;
+  const now = Date.now();
+  team.players.forEach(player => {
+    if (player.fieldEntryTime !== null) {
+      player.playTimeMs += now - player.fieldEntryTime;
+      player.fieldEntryTime = null;
+    }
+  });
+  team = Team.fromJSON(team.toJSON());
+  persist();
+}
+
+/**
+ * Reset all stored data and state
+ */
+export function resetAllData() {
+  clearAllData();
+  team = null;
+  sport = null;
+  teamSize = 11;
+  formation = null;
+}
+
+/**
+ * Reset play time for all players (for new game)
+ */
+export function resetPlayTime() {
+  if (!team) return;
+  team.players.forEach(player => {
+    player.resetPlayTime();
+  });
+  team = Team.fromJSON(team.toJSON());
+  persist();
+}
+
+// Getters
+
 export function getTeam() {
   return team;
 }
 
-/**
- * Get current sport (reactive)
- */
 export function getSport() {
   return sport;
 }
 
-/**
- * Get current team size (reactive)
- */
 export function getTeamSize() {
   return teamSize;
 }
 
-/**
- * Get current formation (reactive)
- */
 export function getFormation() {
   return formation;
 }
 
-/**
- * Get all players (reactive)
- */
 export function getPlayers() {
   return team?.players ?? [];
 }
 
-/**
- * Get field players (reactive)
- */
 export function getFieldPlayers() {
   return team?.getFieldPlayers() || [];
 }
 
-/**
- * Get bench players (reactive)
- */
 export function getBenchPlayers() {
   return team?.getBenchPlayers() || [];
 }
 
-/**
- * Get formation status (reactive)
- */
-export function getFormationStatus() {
-  return team && formation ? team.getFormationStatus(formation) : {};
+export function getFormationStatus(pending = false) {
+  return team && formation ? team.getFormationStatus(formation, pending) : {};
 }
 
 /**
@@ -280,8 +344,8 @@ export function assignPlayerToPendingPosition(playerId, positionName, slotIndex 
   const player = team.getPlayer(playerId);
   if (player) {
     player.assignToPendingPosition(positionName, slotIndex);
-    // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -294,8 +358,8 @@ export function applyPendingPositions() {
   team.players.forEach(player => {
     player.applyPendingPosition();
   });
-  // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
+  persist();
 }
 
 /**
@@ -307,8 +371,8 @@ export function clearPendingPositions() {
   team.players.forEach(player => {
     player.clearPendingPosition();
   });
-  // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
+  persist();
 }
 
 /**
@@ -320,8 +384,8 @@ export function clearPlayerPendingPosition(playerId) {
   const player = team.getPlayer(playerId);
   if (player) {
     player.clearPendingPosition();
-    // Create a new Team instance to trigger reactivity
     team = Team.fromJSON(team.toJSON());
+    persist();
   }
 }
 
@@ -338,6 +402,6 @@ export function initializePendingFromActive() {
       player.clearPendingPosition();
     }
   });
-  // Create a new Team instance to trigger reactivity
   team = Team.fromJSON(team.toJSON());
+  persist();
 }

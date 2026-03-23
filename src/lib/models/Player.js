@@ -14,7 +14,9 @@ export class Player {
     position = null,
     positionIndex = null,
     pendingPosition = null,
-    pendingPositionIndex = null
+    pendingPositionIndex = null,
+    playTimeMs = 0,
+    fieldEntryTime = null
   }) {
     this.id = id;
     this.firstName = firstName;
@@ -26,6 +28,8 @@ export class Player {
     this.positionIndex = positionIndex; // Slot index within position (0-based) or null
     this.pendingPosition = pendingPosition; // Pending position name or null
     this.pendingPositionIndex = pendingPositionIndex; // Pending slot index or null
+    this.playTimeMs = playTimeMs; // Accumulated on-field time in milliseconds
+    this.fieldEntryTime = fieldEntryTime; // Timestamp when player entered the field (null if on bench)
   }
 
   /**
@@ -74,6 +78,10 @@ export class Player {
    * Move player to bench
    */
   moveToBench() {
+    if (this.fieldEntryTime !== null) {
+      this.playTimeMs += Date.now() - this.fieldEntryTime;
+      this.fieldEntryTime = null;
+    }
     this.position = null;
     this.positionIndex = null;
     this.status = 'on_bench';
@@ -114,6 +122,25 @@ export class Player {
   }
 
   /**
+   * Get total play time in milliseconds (including current stint if on field)
+   * @returns {number}
+   */
+  getCurrentPlayTimeMs() {
+    if (this.fieldEntryTime !== null) {
+      return this.playTimeMs + (Date.now() - this.fieldEntryTime);
+    }
+    return this.playTimeMs;
+  }
+
+  /**
+   * Reset play time tracking (for new game)
+   */
+  resetPlayTime() {
+    this.playTimeMs = 0;
+    this.fieldEntryTime = this.isOnField() ? Date.now() : null;
+  }
+
+  /**
    * Create a plain object from player (for serialization)
    * @returns {Object}
    */
@@ -128,7 +155,9 @@ export class Player {
       position: this.position,
       positionIndex: this.positionIndex,
       pendingPosition: this.pendingPosition,
-      pendingPositionIndex: this.pendingPositionIndex
+      pendingPositionIndex: this.pendingPositionIndex,
+      playTimeMs: this.playTimeMs,
+      fieldEntryTime: this.fieldEntryTime
     };
   }
 
