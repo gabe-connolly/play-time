@@ -2,7 +2,7 @@
 slug: play-time
 project: ~/projects/personal/play-time
 phase: climbing
-progress: 22/24
+progress: 23/24
 principal_stated_goal: "I want to take the app as it as as just a proof of concept, and take it to the next level by building it as an app that can be fully shipped on the Google play store."
 ---
 
@@ -68,7 +68,7 @@ Why: the goal is Google Play, and the store has its own definition of shippable.
 - [x] C17: The service worker isn't registered inside the native app. The web PWA still registers it. — device: serviceWorker.getRegistrations() = 0; app.html guard checks Capacitor.isNativePlatform
 - [x] C18: A debug APK installs and runs on the Fire tablet in landscape, with Gabriel's roster migrated. — device: screencap shows My Team 7 players in landscape; data restored byte-identical after demo capture
 - [x] C19: A signed release AAB builds. The upload keystore lives outside the repo and is never committed. — jarsigner: jar verified; SHA-256 01:6F:46…13:A4; git ls-files has no jks/keystore
-- [ ] C20: The Play listing kit exists: privacy policy, data-safety answers, short and full descriptions, 512 icon, feature graphic, tablet screenshots. — kit, icon, feature graphic and 5 tablet screenshots (store/screenshots, demo roster) done; contact email + public policy URL from Gabriel
+- [x] C20: The Play listing kit exists: privacy policy, data-safety answers, short and full descriptions, 512 icon, feature graphic, tablet screenshots. — store/LISTING.md + icon + feature graphic + 5 tablet screenshots; policy live at justforyou.games/privacy with Play Time section (site e3de5c9, verified uncached + Interceptor); contact hello@justforyou.games
 - [ ] C21: The AAB is uploaded to the internal testing track. This is outward-facing and needs Gabriel's go.
 
 ### F0 · Cross-cutting
@@ -104,7 +104,7 @@ Why: these hold across every feature.
 
 ## Remaining Work
 - [x] Gabriel supplied hello@justforyou.games and https://justforyou.games/privacy (live, HTTP 200); wired into the listing and Settings (3dd5757).
-- [ ] Add a Play Time section to the studio policy (just-for-you-games/privacy.html): the live page covers games only, says "one-time purchases", and never mentions on-device rosters or export. Needs Gabriel's OK (his written content, production site).
+- [x] Play Time section added to the studio policy and deployed (just-for-you-games e3de5c9).
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
 - [ ] Gabriel's go-ahead, then upload the AAB to internal testing (C21).
 - [ ] Push branch `play-store` (not pushed; needs Gabriel's OK).
