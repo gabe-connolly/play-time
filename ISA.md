@@ -1,7 +1,7 @@
 ---
 slug: play-time
 project: ~/projects/personal/play-time
-phase: climbing
+phase: complete
 progress: 24/24
 principal_stated_goal: "I want to take the app as it as as just a proof of concept, and take it to the next level by building it as an app that can be fully shipped on the Google play store."
 ---
