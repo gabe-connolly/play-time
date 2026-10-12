@@ -243,7 +243,7 @@
     <div class="bg-white rounded-lg shadow mb-4 px-3 py-2 flex items-center gap-4">
       <!-- Setup button -->
       <button
-        class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm shrink-0"
+        class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 text-sm shrink-0"
         onclick={gameStore.goToSetup}
       >
         <ChevronLeft size={16} /> Setup
@@ -253,22 +253,22 @@
       <div class="flex-1 flex items-center justify-end gap-3">
         <!-- Game Clock -->
         <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
-          <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Clock</span>
+          <span class="text-xs font-medium text-gray-700 uppercase tracking-wide">Clock</span>
           <span class="text-lg font-mono tabular-nums font-bold text-gray-800">
             {formatPlayTime(gameClockMs)}
           </span>
           <button
             class={`px-2.5 py-0.5 rounded font-semibold text-xs transition-colors ${
               clockRunning
-                ? 'bg-red-600 text-white hover:bg-red-700'
-                : 'bg-green-600 text-white hover:bg-green-700'
+                ? 'bg-red-800 text-white hover:bg-red-900'
+                : 'bg-green-800 text-white hover:bg-green-900'
             }`}
             onclick={handleToggleClock}
           >
             {clockRunning ? 'Stop' : gameClockMs > 0 ? 'Resume' : 'Start'}
           </button>
           <button
-            class="px-2.5 py-0.5 rounded font-medium text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+            class="px-2.5 py-0.5 rounded font-medium text-xs bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
             onclick={handleResetClock}
             disabled={clockRunning}
           >
@@ -278,18 +278,18 @@
 
         <!-- Countdown Timer -->
         <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
-          <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Timer</span>
-          <span class={`text-lg font-mono tabular-nums font-bold ${timerExpired ? 'text-red-600' : 'text-gray-800'}`}>
+          <span class="text-xs font-medium text-gray-700 uppercase tracking-wide">Timer</span>
+          <span class={`text-lg font-mono tabular-nums font-bold ${timerExpired ? 'text-red-800' : 'text-gray-800'}`}>
             {formatPlayTime(timerRemainingMs)}
           </span>
           {#if timerDurationMs > 0}
             <button
               class={`px-2.5 py-0.5 rounded font-semibold text-xs transition-colors ${
                 timerRunning
-                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  ? 'bg-red-800 text-white hover:bg-red-900'
                   : timerExpired
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-green-600 text-white hover:bg-green-700'
+                    ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                    : 'bg-green-800 text-white hover:bg-green-900'
               }`}
               onclick={handleToggleTimer}
               disabled={timerExpired && !timerRunning}
@@ -297,7 +297,7 @@
               {timerRunning ? 'Stop' : timerRemainingMs > 0 ? 'Resume' : 'Done'}
             </button>
             <button
-              class="px-2.5 py-0.5 rounded font-medium text-xs bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+              class="px-2.5 py-0.5 rounded font-medium text-xs bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
               onclick={gameStore.resetTimer}
             >
               Reset
@@ -305,14 +305,14 @@
           {/if}
           {#each [5, 10, 15] as mins}
             <button
-              class="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+              class="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors"
               onclick={() => handleStartTimerPreset(mins)}
             >
               {mins}m
             </button>
           {/each}
           {#if timerExpired}
-            <span class="text-xs text-red-600 font-semibold">Time!</span>
+            <span class="text-xs text-red-800 font-semibold">Time!</span>
           {/if}
         </div>
       </div>
@@ -322,7 +322,7 @@
     <div class="flex gap-4">
       <!-- Left: Field -->
       <div class="flex-1 min-w-0">
-        <div class="bg-white rounded-lg shadow-lg p-6">
+        <div>
           <FieldView
             {sport}
             {formation}
@@ -354,7 +354,7 @@
 
         <div class="text-center py-4">
           <button
-            class="text-sm text-red-400 hover:text-red-600 underline"
+            class="text-sm text-red-800 hover:text-red-900 underline"
             onclick={handleClearData}
           >
             Clear All Data
@@ -370,8 +370,8 @@
             <button
               class={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
                 playerListView === 'bench'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-blue-800 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
               onclick={() => gameStore.setPlayerListView('bench')}
             >
@@ -380,8 +380,8 @@
             <button
               class={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
                 playerListView === 'roster'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-blue-800 text-white'
+                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
               onclick={() => gameStore.setPlayerListView('roster')}
             >

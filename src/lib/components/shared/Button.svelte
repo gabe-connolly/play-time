@@ -7,10 +7,10 @@
   } = $props();
 
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300',
-    secondary: 'bg-gray-300 text-gray-700 hover:bg-gray-400',
-    success: 'bg-green-600 text-white hover:bg-green-700',
-    danger: 'bg-red-600 text-white hover:bg-red-700'
+    primary: 'bg-blue-800 text-white hover:bg-blue-900 disabled:bg-blue-300',
+    secondary: 'bg-gray-300 text-gray-900 hover:bg-gray-200',
+    success: 'bg-green-800 text-white hover:bg-green-900',
+    danger: 'bg-red-800 text-white hover:bg-red-900'
   };
 </script>
 

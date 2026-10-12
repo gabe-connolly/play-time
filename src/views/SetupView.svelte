@@ -101,7 +101,7 @@
 
     <div class="text-center py-4">
       <button
-        class="text-sm text-red-400 hover:text-red-600 underline"
+        class="text-sm text-red-800 hover:text-red-900 underline"
         onclick={handleClearData}
       >
         Clear All Data

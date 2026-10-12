@@ -13,8 +13,8 @@
       <button
         class={`px-6 py-3 rounded-lg font-medium transition-colors ${
           selectedSport?.id === sport.id
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ? 'bg-blue-800 text-white'
+            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
         }`}
         onclick={() => onSelect(sport)}
       >

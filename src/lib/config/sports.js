@@ -5,10 +5,10 @@ import { Formation } from '../models/Formation.js';
  * Soccer Sport Configuration
  */
 const soccerPositions = [
-  new Position({ name: 'Goalkeeper', abbr: 'GK', color: 'bg-yellow-400', defaultCount: 1 }),
-  new Position({ name: 'Defender', abbr: 'DEF', color: 'bg-blue-400', defaultCount: 4 }),
-  new Position({ name: 'Midfielder', abbr: 'MID', color: 'bg-green-400', defaultCount: 3 }),
-  new Position({ name: 'Forward', abbr: 'FWD', color: 'bg-red-400', defaultCount: 3 })
+  new Position({ name: 'Goalkeeper', abbr: 'GK', color: 'bg-yellow-200', defaultCount: 1 }),
+  new Position({ name: 'Defender', abbr: 'DEF', color: 'bg-blue-200', defaultCount: 4 }),
+  new Position({ name: 'Midfielder', abbr: 'MID', color: 'bg-green-200', defaultCount: 3 }),
+  new Position({ name: 'Forward', abbr: 'FWD', color: 'bg-red-200', defaultCount: 3 })
 ];
 
 const soccerFormations = {
@@ -43,10 +43,10 @@ export const SOCCER = new Sport({
  * Field Hockey Sport Configuration
  */
 const fieldHockeyPositions = [
-  new Position({ name: 'Goalkeeper', abbr: 'GK', color: 'bg-yellow-400', defaultCount: 1 }),
-  new Position({ name: 'Defender', abbr: 'DEF', color: 'bg-blue-400', defaultCount: 3 }),
-  new Position({ name: 'Midfielder', abbr: 'MID', color: 'bg-green-400', defaultCount: 3 }),
-  new Position({ name: 'Forward', abbr: 'FWD', color: 'bg-red-400', defaultCount: 3 })
+  new Position({ name: 'Goalkeeper', abbr: 'GK', color: 'bg-yellow-200', defaultCount: 1 }),
+  new Position({ name: 'Defender', abbr: 'DEF', color: 'bg-blue-200', defaultCount: 3 }),
+  new Position({ name: 'Midfielder', abbr: 'MID', color: 'bg-green-200', defaultCount: 3 }),
+  new Position({ name: 'Forward', abbr: 'FWD', color: 'bg-red-200', defaultCount: 3 })
 ];
 
 const fieldHockeyFormations = {

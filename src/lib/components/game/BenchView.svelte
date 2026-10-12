@@ -36,7 +36,7 @@
   <h2 class="text-xl font-bold mb-3">Bench ({benchPlayers.length})</h2>
 
   {#if benchPlayers.length === 0}
-    <p class="text-gray-500 text-center py-4">All players are on the field</p>
+    <p class="text-gray-700 text-center py-4">All players are on the field</p>
   {:else}
     <div class="grid grid-cols-1 gap-2 mb-4">
       {#each benchPlayers as player (player.id)}
@@ -63,7 +63,7 @@
             <button
               class={`px-3 py-2 rounded-lg text-sm font-medium ${
                 hasSpace
-                  ? `${pos.color} hover:opacity-80`
+                  ? `${pos.color} text-gray-900 hover:ring-2 hover:ring-gray-800`
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
               disabled={!hasSpace}

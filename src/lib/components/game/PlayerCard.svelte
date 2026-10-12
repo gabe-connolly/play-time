@@ -101,14 +101,14 @@
     <div>
       <span class="font-medium">{getDisplayName(player, displayFormat)}</span>
       {#if player.jerseyNumber}
-        <span class="text-gray-500 ml-2">#{player.jerseyNumber}</span>
+        <span class="text-gray-700 ml-2">#{player.jerseyNumber}</span>
       {/if}
       {#if player.nickname && displayFormat !== 'nickname'}
-        <span class="text-gray-500 text-sm ml-2">({player.nickname})</span>
+        <span class="text-gray-700 text-sm ml-2">({player.nickname})</span>
       {/if}
     </div>
     {#if showPlayTime}
-      <span class="text-xs font-mono tabular-nums px-1.5 py-0.5 rounded {player.isOnField() ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-600'}">
+      <span class="text-xs font-mono tabular-nums px-1.5 py-0.5 rounded {player.isOnField() ? 'bg-green-100 text-green-900' : 'bg-gray-200 text-gray-800'}">
         {formatPlayTime(currentPlayTime)}
       </span>
     {/if}

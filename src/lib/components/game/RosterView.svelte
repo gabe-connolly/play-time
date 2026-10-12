@@ -30,14 +30,14 @@
     if (isAssignedActive(player)) {
       badges.push({
         label: `Active: ${player.position}`,
-        color: 'bg-blue-600 text-white'
+        color: 'bg-blue-800 text-white'
       });
     }
     
     if (isAssignedPending(player)) {
       badges.push({
         label: `Pending: ${player.pendingPosition}`,
-        color: 'bg-orange-600 text-white'
+        color: 'bg-orange-800 text-white'
       });
     }
     
@@ -68,7 +68,7 @@
   <h2 class="text-xl font-bold mb-3">Full Roster ({rosterPlayers.length})</h2>
 
   {#if rosterPlayers.length === 0}
-    <p class="text-gray-500 text-center py-4">No players in roster</p>
+    <p class="text-gray-700 text-center py-4">No players in roster</p>
   {:else}
     <div class="grid grid-cols-1 gap-2">
       {#each rosterPlayers as player (player.id)}

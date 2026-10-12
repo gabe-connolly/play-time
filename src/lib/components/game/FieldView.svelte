@@ -47,80 +47,78 @@
   );
 </script>
 
-<div class="bg-green-600 rounded-lg p-6 mb-6">
-  <div class="bg-green-500 rounded-lg p-4">
-    <div class="flex items-center justify-between mb-4">
-      <!-- Left: label -->
-      <h2 class="text-white text-lg font-bold w-28">
-        {isPendingMode ? 'Pending' : 'Field'}
-      </h2>
+<div class="bg-green-900 rounded-lg p-4 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <!-- Left: label -->
+    <h2 class="text-white text-lg font-bold w-28">
+      {isPendingMode ? 'Pending' : 'Field'}
+    </h2>
 
-      <!-- Center: view toggle -->
-      <div>
-        {#if hasPendingWork}
-          <div class="flex rounded-lg overflow-hidden border border-white/30">
-            <button
-              class={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                !isPendingMode
-                  ? 'bg-white text-green-800'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-              onclick={onViewActive}
-            >
-              Active
-            </button>
-            <button
-              class={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                isPendingMode
-                  ? 'bg-white text-orange-700'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-              onclick={onViewPending}
-            >
-              Pending
-            </button>
-          </div>
-        {/if}
-      </div>
+    <!-- Center: view toggle -->
+    <div>
+      {#if hasPendingWork}
+        <div class="flex rounded-lg overflow-hidden border border-white/30">
+          <button
+            class={`px-2.5 py-1 text-xs font-medium transition-colors ${
+              !isPendingMode
+                ? 'bg-white text-green-900'
+                : 'bg-green-950 text-white hover:bg-black'
+            }`}
+            onclick={onViewActive}
+          >
+            Active
+          </button>
+          <button
+            class={`px-2.5 py-1 text-xs font-medium transition-colors ${
+              isPendingMode
+                ? 'bg-white text-orange-800'
+                : 'bg-green-950 text-white hover:bg-black'
+            }`}
+            onclick={onViewPending}
+          >
+            Pending
+          </button>
+        </div>
+      {/if}
+    </div>
 
-      <!-- Right: sub actions -->
-      <div class="w-28 flex justify-end gap-1.5">
-        {#if hasPendingWork}
-          <button
-            class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/90 text-green-800 hover:bg-white transition-colors"
-            onclick={onCommitSubs}
-          >
-            Sub Now
-          </button>
-          <button
-            class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/20 text-white hover:bg-white/30 transition-colors"
-            onclick={onDiscardSubs}
-          >
-            Discard
-          </button>
-        {:else}
-          <button
-            class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/20 text-white hover:bg-white/30 transition-colors"
-            onclick={onPrepareSubs}
-          >
-            Prepare Subs
-          </button>
-        {/if}
-      </div>
+    <!-- Right: sub actions -->
+    <div class="w-28 flex justify-end gap-1.5">
+      {#if hasPendingWork}
+        <button
+          class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/90 text-green-900 hover:bg-white transition-colors"
+          onclick={onCommitSubs}
+        >
+          Sub Now
+        </button>
+        <button
+          class="px-2.5 py-1 rounded-lg text-xs font-medium bg-green-950 text-white hover:bg-black transition-colors"
+          onclick={onDiscardSubs}
+        >
+          Discard
+        </button>
+      {:else}
+        <button
+          class="px-2.5 py-1 rounded-lg text-xs font-medium bg-green-950 text-white hover:bg-black transition-colors"
+          onclick={onPrepareSubs}
+        >
+          Prepare Subs
+        </button>
+      {/if}
     </div>
-    <div class="space-y-4">
-      {#each positionGroups as group (group.position.name)}
-        <PositionGroup
-          position={group.position}
-          players={group.players}
-          needed={group.needed}
-          {displayFormat}
-          {substitutingPlayerId}
-          {isPendingMode}
-          {onPlayerClick}
-          {onDropPlayer}
-        />
-      {/each}
-    </div>
+  </div>
+  <div class="space-y-4">
+    {#each positionGroups as group (group.position.name)}
+      <PositionGroup
+        position={group.position}
+        players={group.players}
+        needed={group.needed}
+        {displayFormat}
+        {substitutingPlayerId}
+        {isPendingMode}
+        {onPlayerClick}
+        {onDropPlayer}
+      />
+    {/each}
   </div>
 </div>

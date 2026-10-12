@@ -24,11 +24,11 @@
 </script>
 
 {#if show}
-	<div class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between bg-blue-600 px-4 py-3 text-white text-sm">
+	<div class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between bg-blue-800 px-4 py-3 text-white text-sm">
 		<span>Update available</span>
 		<div class="flex gap-3">
 			<button onclick={apply} class="font-semibold underline">Refresh</button>
-			<button onclick={dismiss} class="opacity-75">Dismiss</button>
+			<button onclick={dismiss} class="text-blue-100">Dismiss</button>
 		</div>
 	</div>
 {/if}

@@ -130,7 +130,7 @@
   }
 </script>
 
-<div class="bg-white/10 rounded-lg p-3">
+<div class="bg-green-800 rounded-lg p-3">
   <div class="flex items-center justify-between mb-2">
     <h3 class="text-white font-semibold">{position.name}</h3>
     <span class="text-white text-sm">
@@ -141,9 +141,9 @@
   <div class="flex flex-wrap gap-2 justify-center">
     {#each slots as player, idx (idx)}
       <button
-        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] w-[180px] flex flex-col items-center justify-center hover:opacity-80 transition-opacity ${
-          substitutingPlayerId === player?.id ? 'ring-2 ring-red-500' : ''
-        } ${!player ? 'border-2 border-dashed border-white/30' : ''}`}
+        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] w-[180px] flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
+          substitutingPlayerId === player?.id ? 'ring-4 ring-white' : ''
+        } ${!player ? 'border-2 border-dashed border-white/70' : ''}`}
         onclick={() => player && onPlayerClick?.(player.id)}
         disabled={!player}
         ondragover={handleDragOver}
@@ -157,7 +157,7 @@
         data-position={position.name}
       >
         {#if player}
-          <div class="text-xs text-gray-500 mb-1 opacity-70">{getDirectionalLabel(idx, needed)}</div>
+          <div class="text-xs text-gray-800 mb-1">{getDirectionalLabel(idx, needed)}</div>
           <div class="font-semibold text-sm">
             {getDisplayName(player, displayFormat)}
           </div>
@@ -165,13 +165,13 @@
             <div class="text-xs mt-1">#{player.jerseyNumber}</div>
           {/if}
           {#if substitutingPlayerId === player.id}
-            <div class="text-xs mt-1 text-red-700 font-bold">
+            <div class="text-xs mt-1 px-1.5 rounded bg-red-900 text-white font-bold">
               Subbing out
             </div>
           {/if}
         {:else}
-          <div class="text-xs text-gray-400 mb-1">{getDirectionalLabel(idx, needed)}</div>
-          <div class="text-sm text-gray-600">Empty</div>
+          <div class="text-xs text-gray-800 mb-1">{getDirectionalLabel(idx, needed)}</div>
+          <div class="text-sm text-gray-800">Empty</div>
         {/if}
       </button>
     {/each}

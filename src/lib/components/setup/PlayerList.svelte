@@ -27,7 +27,7 @@
   <div class="flex justify-between items-center mb-3">
     <h2 class="text-xl font-semibold">Players ({players.length})</h2>
     <button
-      class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+      class="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg hover:bg-green-900"
       onclick={() => showAddForm = !showAddForm}
     >
       <Plus size={20} /> Add Player
@@ -45,7 +45,7 @@
 
   <div class="space-y-2">
     {#if players.length === 0}
-      <p class="text-gray-500 text-center py-8">No players added yet</p>
+      <p class="text-gray-700 text-center py-8">No players added yet</p>
     {:else}
       {#each players as player (player.id)}
         {#if editingPlayerId === player.id}
