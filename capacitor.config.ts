@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'games.justforyou',
+  appId: 'games.justforyou.playtime',
   appName: 'Play Time',
   webDir: 'dist'
 };

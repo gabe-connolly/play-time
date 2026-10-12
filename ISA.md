@@ -27,7 +27,7 @@ A coach installs Play Time from Google Play onto a sideline tablet, enters a ros
 
 ## Constraints
 - SvelteKit 2 + Svelte 5 runes, Tailwind 4, Capacitor 8, bun.
-- Android package `games.justforyou`, app name "Play Time", locked to landscape.
+- Android package `games.justforyou.playtime`, app name "Play Time", locked to landscape.
 - WCAG 2.2 AAA text contrast (7:1, 4.5:1 for large text).
 
 ## Features
@@ -64,7 +64,7 @@ Why: on-device data is only trustworthy if it survives upgrades and can move bet
 
 ### F6 · Android release
 Why: the goal is Google Play, and the store has its own definition of shippable.
-- [x] C16: The Capacitor Android project builds with `appId games.justforyou` and `appName Play Time`, and the activity is locked to landscape. — dumpsys: versionCode 1, targetSdk 36; manifest sensorLandscape; device screen.orientation landscape
+- [x] C16: The Capacitor Android project builds with `appId games.justforyou.playtime` and `appName Play Time`, and the activity is locked to landscape. — dumpsys: versionCode 1, targetSdk 36; manifest sensorLandscape; device screen.orientation landscape
 - [x] C17: The service worker isn't registered inside the native app. The web PWA still registers it. — device: serviceWorker.getRegistrations() = 0; app.html guard checks Capacitor.isNativePlatform
 - [x] C18: A debug APK installs and runs on the Fire tablet in landscape, with Gabriel's roster migrated. — device: screencap shows My Team 7 players in landscape; data restored byte-identical after demo capture
 - [x] C19: A signed release AAB builds. The upload keystore lives outside the repo and is never committed. — jarsigner: jar verified; SHA-256 01:6F:46…13:A4; git ls-files has no jks/keystore

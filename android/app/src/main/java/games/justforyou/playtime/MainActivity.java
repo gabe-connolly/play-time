@@ -1,4 +1,4 @@
-package games.justforyou;
+package games.justforyou.playtime;
 
 import com.getcapacitor.BridgeActivity;
 

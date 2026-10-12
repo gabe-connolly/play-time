@@ -7,7 +7,7 @@ Everything Play Console asks for, ready to paste. Items marked **[YOU]** are att
 | Field | Value |
 |---|---|
 | App name (30 max) | Play Time |
-| Package | `games.justforyou` |
+| Package | `games.justforyou.playtime` |
 | Default language | English (United States), en-US |
 | App or game | App |
 | Free or paid | Free |

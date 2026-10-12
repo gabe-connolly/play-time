@@ -20,7 +20,7 @@ After completing any build or code change:
 ## Architecture
 
 - SvelteKit 2 + Svelte 5 runes, client-only with the **hash router** (`#/teams/:id`). Link with `href()` / `go()` from `$lib/utils/nav.js`.
-- Static adapter → `dist/`, wrapped by **Capacitor 8** for Android (`android/`, app id `games.justforyou`, landscape-locked).
+- Static adapter → `dist/`, wrapped by **Capacitor 8** for Android (`android/`, app id `games.justforyou.playtime`, landscape-locked).
 - All data is one schema-versioned document (`$lib/data/schema.js`), persisted by `$lib/utils/storage.js`: Capacitor Preferences on native, localStorage on the web. v1 data (`field_coach_team`) migrates on first load.
 - `appStore.svelte.js` owns teams, games and settings. Models are replaced, never mutated in place, so runes see the change (`mutateGame(id, (copy, now) => ...)`).
 - **Playtime is measured on the game clock, never the wall clock.** `GameClock` caps at the current period's end, and `Participant.stints` hold game-clock ms. Don't put `Date.now()` in the models.

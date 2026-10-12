@@ -12,10 +12,10 @@ if (keystorePropertiesFile.isFile()) {
 }
 
 android {
-    namespace = "games.justforyou"
+    namespace = "games.justforyou.playtime"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "games.justforyou"
+        applicationId "games.justforyou.playtime"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
