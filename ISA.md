@@ -103,7 +103,8 @@ Why: these hold across every feature.
 - `@testing-library/svelte` needs `server.deps.inline` in vitest to compile its `.svelte.js` module; without it, component tests fail with `rune_outside_svelte`.
 
 ## Remaining Work
-- [ ] Gabriel supplies a contact email and the privacy-policy URL (C20).
+- [x] Gabriel supplied hello@justforyou.games and https://justforyou.games/privacy (live, HTTP 200); wired into the listing and Settings (3dd5757).
+- [ ] Add a Play Time section to the studio policy (just-for-you-games/privacy.html): the live page covers games only, says "one-time purchases", and never mentions on-device rosters or export. Needs Gabriel's OK (his written content, production site).
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
 - [ ] Gabriel's go-ahead, then upload the AAB to internal testing (C21).
 - [ ] Push branch `play-store` (not pushed; needs Gabriel's OK).
