@@ -82,4 +82,12 @@ describe('GameClock', () => {
     expect(restored.isRunning).toBe(true);
     expect(restored.clockMs(1000 + 3 * MIN)).toBe(3 * MIN);
   });
+
+  it('closes the period when paused exactly at 0:00', () => {
+    const clock = halves25();
+    clock.start(0);
+    clock.pause(25 * MIN + 100);
+    expect(clock.isPeriodOver).toBe(true);
+    expect(clock.nextPeriod()).toBe(true);
+  });
 });

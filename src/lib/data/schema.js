@@ -74,19 +74,31 @@ export function normalizeDoc(data, now) {
 }
 
 /**
- * Merge an imported document into the current one. Records with the same
- * id are replaced by the imported copy; everything else is kept.
+ * Merge an imported document into the current one without losing data:
+ * records only one side has are kept, and same-id records are combined.
  */
 export function mergeDocs(current, incoming) {
-  const byId = (list, extra) => {
+  const byId = (list, extra, combine) => {
     const map = new Map(list.map(x => [x.id, x]));
-    extra.forEach(x => map.set(x.id, x));
+    extra.forEach(x => map.set(x.id, map.has(x.id) ? combine(map.get(x.id), x) : x));
     return [...map.values()];
+  };
+  // A team keeps every player either copy knows about; the imported copy wins per field.
+  const mergeTeam = (mine, theirs) => ({
+    ...mine,
+    ...theirs,
+    players: byId(mine.players || [], theirs.players || [], (_, p) => p)
+  });
+  // A game keeps whichever copy got further: final beats live, then more clock played.
+  const progress = g => [g.status === 'final' ? 1 : 0, g.clock?.elapsedMs ?? 0];
+  const mergeGame = (mine, theirs) => {
+    const [a, b] = [progress(mine), progress(theirs)];
+    return b[0] > a[0] || (b[0] === a[0] && b[1] >= a[1]) ? theirs : mine;
   };
   return {
     schemaVersion: SCHEMA_VERSION,
-    teams: byId(current.teams, incoming.teams),
-    games: byId(current.games, incoming.games),
+    teams: byId(current.teams, incoming.teams, mergeTeam),
+    games: byId(current.games, incoming.games, mergeGame),
     settings: current.settings
   };
 }

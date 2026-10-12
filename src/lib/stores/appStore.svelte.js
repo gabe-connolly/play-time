@@ -18,6 +18,7 @@ import {
 import {
   readDocText,
   writeDocText,
+  preserveUnreadableDocText,
   clearDocText,
   readLegacyTeamText,
   clearLegacyData
@@ -28,6 +29,7 @@ let loadError = $state(null);
 let teams = $state([]);
 let games = $state([]);
 let settings = $state({ ...DEFAULT_SETTINGS });
+let writesBlocked = false;
 
 function snapshot() {
   return {
@@ -39,6 +41,7 @@ function snapshot() {
 }
 
 function persist() {
+  if (writesBlocked) return Promise.resolve();
   return writeDocText(JSON.stringify(snapshot()));
 }
 
@@ -54,8 +57,9 @@ function hydrate(doc) {
 export async function init() {
   if (ready) return;
   const now = Date.now();
+  let text = null;
   try {
-    const text = await readDocText();
+    text = await readDocText();
     if (text) {
       hydrate(normalizeDoc(JSON.parse(text), now));
     } else {
@@ -66,6 +70,15 @@ export async function init() {
   } catch (error) {
     console.error('Failed to load data:', error);
     loadError = error.message;
+    if (text) {
+      try {
+        await preserveUnreadableDocText(text);
+      } catch (saveError) {
+        // Without a safe copy, stay read-only rather than overwrite the original.
+        console.error('Could not preserve unreadable data:', saveError);
+        writesBlocked = true;
+      }
+    }
     hydrate(emptyDoc());
   }
   ready = true;

@@ -159,11 +159,23 @@
   function handleCompleteSubstitution() {
     if (!substitutingPlayerId || !selectedBenchPlayerId) return;
     const [outId, inId] = [substitutingPlayerId, selectedBenchPlayerId];
-    update((copy, at) => copy.substitute(outId, inId, null, at));
+    update((copy, at) => {
+      if (isPendingMode) {
+        const out = copy.getParticipant(outId);
+        if (!out || out.pendingPosition === null) return false;
+        copy.assignToPendingPosition(inId, out.pendingPosition, out.pendingPositionIndex);
+        copy.clearPendingPosition(outId);
+      } else {
+        copy.substitute(outId, inId, null, at);
+      }
+    });
     gameStore.cancelSubstitution();
   }
 
   function handleDropPlayer(playerId, positionName, slotIndex, replacedPlayerId) {
+    if (substitutingPlayerId && [playerId, replacedPlayerId].includes(substitutingPlayerId)) {
+      gameStore.cancelSubstitution();
+    }
     update((copy, at) => {
       const dragged = copy.getParticipant(playerId);
       if (!dragged || dragged.isOut()) return false;
@@ -189,7 +201,9 @@
   }
 
   function handleDropToBench(playerId) {
-    if (!isPendingMode) update((copy, at) => copy.moveToBench(playerId, at));
+    if (isPendingMode) return;
+    if (substitutingPlayerId === playerId) gameStore.cancelSubstitution();
+    update((copy, at) => copy.moveToBench(playerId, at));
   }
 
   function handleToggleAvailability(playerId, available) {

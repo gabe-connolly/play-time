@@ -79,6 +79,7 @@ export class GameClock {
     if (!this.isRunning) return false;
     this.elapsedMs = this.clockMs(now);
     this.runningSince = null;
+    if (this.elapsedMs >= this.periodEndMs) this.currentPeriod.endMs = this.elapsedMs;
     return true;
   }
 
@@ -90,7 +91,6 @@ export class GameClock {
   tick(now) {
     if (this.isRunning && this.clockMs(now) >= this.periodEndMs) {
       this.pause(now);
-      this.currentPeriod.endMs = this.elapsedMs;
       return true;
     }
     return false;

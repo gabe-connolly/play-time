@@ -13,10 +13,16 @@
   const displayFormat = $derived(appStore.getSettings().displayFormat);
 
   const now = Date.now();
+  // Whole seconds per period, and the total is their sum, so the row always adds up.
+  const toSeconds = ms => Math.floor(ms / 1000) * 1000;
   const rows = $derived(
     game
       ? game
           .getPlaytimeSummary(now)
+          .map(r => {
+            const periodMs = r.periodMs.map(toSeconds);
+            return { ...r, periodMs, totalMs: periodMs.reduce((a, b) => a + b, 0) };
+          })
           .sort((a, b) => b.totalMs - a.totalMs || a.participant.lastName.localeCompare(b.participant.lastName))
       : []
   );

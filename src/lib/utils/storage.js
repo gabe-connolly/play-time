@@ -32,6 +32,18 @@ export function writeDocText(text) {
   return writeChain;
 }
 
+/**
+ * Keep a copy of stored data the app couldn't read, under a dated key, so a
+ * later save can never destroy it.
+ * @returns {Promise<string>} the key it was saved under
+ */
+export async function preserveUnreadableDocText(text) {
+  const key = `${DOC_KEY}_unreadable_${Date.now()}`;
+  if (isNative()) await Preferences.set({ key, value: text });
+  else localStorage.setItem(key, text);
+  return key;
+}
+
 export async function clearDocText() {
   await writeChain.catch(() => {});
   if (isNative()) await Preferences.remove({ key: DOC_KEY });

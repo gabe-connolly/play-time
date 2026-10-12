@@ -131,4 +131,26 @@ describe('Game', () => {
     expect(game.getFormationStatus().Goalkeeper).toMatchObject({ current: 1, needed: 1, isFull: true });
     expect(game.getFormationStatus(true).Defender).toMatchObject({ current: 1, hasSpace: false });
   });
+
+  it('refuses a substitution whose outgoing player is not on the field (no ghost player)', () => {
+    game.startClock(0);
+    game.substitute('a', 'b', null, MIN); // a is on the bench
+    const b = game.getParticipant('b');
+    expect(b.isOnBench()).toBe(true);
+    expect(b.getPlayTimeMs(game.clockMs(10 * MIN))).toBe(0);
+  });
+
+  it('refuses every lineup change once the game is final', () => {
+    game.assignToPosition('a', 'Goalkeeper', 0, 0);
+    game.startClock(0);
+    game.end(5 * MIN);
+    const before = JSON.stringify(game.toJSON());
+    game.assignToPosition('b', 'Defender', 0, 6 * MIN);
+    game.moveToBench('a', 6 * MIN);
+    game.setAvailability('c', false, 6 * MIN);
+    game.assignToPendingPosition('c', 'Defender', 0);
+    game.commitPending(6 * MIN);
+    game.addParticipant(makeTeam().getPlayer('d'));
+    expect(JSON.stringify(game.toJSON())).toBe(before);
+  });
 });

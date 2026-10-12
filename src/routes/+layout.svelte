@@ -28,7 +28,7 @@
 {#if ready}
   {#if loadError}
     <div class="bg-red-800 text-white text-sm px-4 py-2" role="alert">
-      Saved data could not be read ({loadError}). Starting empty; import a backup from Settings.
+      Saved data could not be read ({loadError}). A copy was kept on this device, and the app is starting empty. Import a backup from Settings.
     </div>
   {/if}
   {@render children()}

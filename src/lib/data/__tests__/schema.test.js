@@ -92,4 +92,22 @@ describe('schema', () => {
     const merged = mergeDocs(current, incoming);
     expect(merged.teams.map(t => t.name).sort()).toEqual(['Keep', 'New']);
   });
+
+  it('importing an older backup keeps players and game progress added since', () => {
+    const current = {
+      ...emptyDoc(),
+      teams: [{ id: 't', name: 'Tigers', players: [{ id: 'a', firstName: 'A' }, { id: 'new', firstName: 'N' }] }],
+      games: [{ id: 'g', status: 'final', clock: { elapsedMs: 3000000 } }, { id: 'h', status: 'live', clock: { elapsedMs: 900 } }]
+    };
+    const older = normalizeDoc({
+      schemaVersion: 2,
+      teams: [{ id: 't', name: 'Tigers FC', players: [{ id: 'a', firstName: 'Ann' }] }],
+      games: [{ id: 'g', status: 'live', clock: { elapsedMs: 600000 } }, { id: 'h', status: 'live', clock: { elapsedMs: 100 } }]
+    }, 0);
+    const merged = mergeDocs(current, older);
+    expect(merged.teams[0].name).toBe('Tigers FC');
+    expect(merged.teams[0].players.map(p => p.firstName).sort()).toEqual(['Ann', 'N']);
+    expect(merged.games.find(g => g.id === 'g').status).toBe('final');
+    expect(merged.games.find(g => g.id === 'h').clock.elapsedMs).toBe(900);
+  });
 });

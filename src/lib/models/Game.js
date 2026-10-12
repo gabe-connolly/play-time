@@ -123,19 +123,19 @@ export class Game {
 
   assignToPosition(playerId, positionName, slotIndex, now) {
     const p = this.getParticipant(playerId);
-    if (!p || p.isOut()) return;
+    if (this.isFinal || !p || p.isOut()) return;
     p.assignToPosition(positionName, slotIndex, this.clockMs(now));
   }
 
   moveToBench(playerId, now) {
     const p = this.getParticipant(playerId);
-    if (p && p.isOnField()) p.moveToBench(this.clockMs(now));
+    if (!this.isFinal && p && p.isOnField()) p.moveToBench(this.clockMs(now));
   }
 
   substitute(outId, inId, slotIndex, now) {
     const out = this.getParticipant(outId);
     const incoming = this.getParticipant(inId);
-    if (!out || !incoming || incoming.isOut()) return;
+    if (this.isFinal || !out?.isOnField() || !incoming || incoming.isOut() || incoming.isOnField()) return;
     const clockMs = this.clockMs(now);
     const position = out.position;
     const slot = slotIndex ?? out.positionIndex;
@@ -146,7 +146,7 @@ export class Game {
   swapFieldPlayers(aId, bId, now) {
     const a = this.getParticipant(aId);
     const b = this.getParticipant(bId);
-    if (!a || !b || !a.isOnField() || !b.isOnField()) return;
+    if (this.isFinal || !a || !b || !a.isOnField() || !b.isOnField()) return;
     const clockMs = this.clockMs(now);
     const [pos, idx] = [a.position, a.positionIndex];
     a.assignToPosition(b.position, b.positionIndex, clockMs);
@@ -155,14 +155,14 @@ export class Game {
 
   setAvailability(playerId, available, now) {
     const p = this.getParticipant(playerId);
-    if (!p) return;
+    if (this.isFinal || !p) return;
     if (available) p.markIn();
     else p.markOut(this.clockMs(now));
   }
 
   /** Add a rostered player who wasn't picked at setup (late arrival). */
   addParticipant(player) {
-    if (this.getParticipant(player.id)) return;
+    if (this.isFinal || this.getParticipant(player.id)) return;
     this.participants = [...this.participants, Participant.fromPlayer(player)];
   }
 
@@ -170,7 +170,7 @@ export class Game {
 
   assignToPendingPosition(playerId, positionName, slotIndex) {
     const p = this.getParticipant(playerId);
-    if (p && !p.isOut()) p.assignToPendingPosition(positionName, slotIndex);
+    if (!this.isFinal && p && !p.isOut()) p.assignToPendingPosition(positionName, slotIndex);
   }
 
   clearPendingPosition(playerId) {
@@ -189,6 +189,7 @@ export class Game {
   }
 
   commitPending(now) {
+    if (this.isFinal) return;
     const clockMs = this.clockMs(now);
     // Bench outgoing players first so a stint never spans a slot handover.
     this.participants
