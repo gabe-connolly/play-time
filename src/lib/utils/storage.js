@@ -1,105 +1,57 @@
 /**
- * Storage utility for persisting team data
+ * Persistence adapter for the app document.
+ * Native builds use Capacitor Preferences (durable app storage); the web
+ * build uses localStorage. Writes are serialized so the last save wins.
  */
+import { Capacitor } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
+import { LEGACY_TEAM_KEY, LEGACY_GAME_STATE_KEY } from '$lib/data/schema.js';
 
-const STORAGE_KEY = 'field_coach_team';
-const GAME_STATE_KEY = 'field_coach_game_state';
+const DOC_KEY = 'play_time_doc';
 
-/**
- * Save team to localStorage
- * @param {Team} team
- */
-export function saveTeam(team) {
-  try {
-    const data = team.toJSON();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return true;
-  } catch (error) {
-    console.error('Error saving team:', error);
-    return false;
+const isNative = () => Capacitor.isNativePlatform();
+
+/** @returns {Promise<string|null>} */
+export async function readDocText() {
+  if (isNative()) {
+    const { value } = await Preferences.get({ key: DOC_KEY });
+    return value;
   }
+  return localStorage.getItem(DOC_KEY);
 }
 
-/**
- * Load team from localStorage
- * @returns {Object|null}
- */
-export function loadTeam() {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : null;
-  } catch (error) {
-    console.error('Error loading team:', error);
-    return null;
-  }
+let writeChain = Promise.resolve();
+
+/** @param {string} text */
+export function writeDocText(text) {
+  writeChain = writeChain
+    .catch(() => {})
+    .then(() =>
+      isNative() ? Preferences.set({ key: DOC_KEY, value: text }) : localStorage.setItem(DOC_KEY, text)
+    );
+  return writeChain;
 }
 
-/**
- * Clear team data from localStorage
- */
-export function clearTeam() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    return true;
-  } catch (error) {
-    console.error('Error clearing team:', error);
-    return false;
-  }
+export async function clearDocText() {
+  await writeChain.catch(() => {});
+  if (isNative()) await Preferences.remove({ key: DOC_KEY });
+  else localStorage.removeItem(DOC_KEY);
 }
 
-/**
- * Save game state to localStorage
- * @param {Object} state
- */
-export function saveGameState(state) {
+/** v1 single-team record, if this origin ever ran the old app. */
+export function readLegacyTeamText() {
   try {
-    localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state));
-    return true;
-  } catch (error) {
-    console.error('Error saving game state:', error);
-    return false;
-  }
-}
-
-/**
- * Load game state from localStorage
- * @returns {Object|null}
- */
-export function loadGameState() {
-  try {
-    const data = localStorage.getItem(GAME_STATE_KEY);
-    return data ? JSON.parse(data) : null;
-  } catch (error) {
-    console.error('Error loading game state:', error);
-    return null;
-  }
-}
-
-/**
- * Clear all app data from localStorage
- */
-export function clearAllData() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(GAME_STATE_KEY);
-    return true;
-  } catch (error) {
-    console.error('Error clearing data:', error);
-    return false;
-  }
-}
-
-/**
- * Check if storage is available
- * @returns {boolean}
- */
-export function isStorageAvailable() {
-  try {
-    const test = '__storage_test__';
-    localStorage.setItem(test, test);
-    localStorage.removeItem(test);
-    return true;
+    return localStorage.getItem(LEGACY_TEAM_KEY);
   } catch {
-    return false;
+    return null;
+  }
+}
+
+export function clearLegacyData() {
+  try {
+    localStorage.removeItem(LEGACY_TEAM_KEY);
+    localStorage.removeItem(LEGACY_GAME_STATE_KEY);
+  } catch {
+    // Storage unavailable; nothing to clear.
   }
 }

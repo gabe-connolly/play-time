@@ -1,35 +1,15 @@
 /**
  * Player Model
- * Represents a player on the team
+ * A rostered player on a team. Game-time state lives on Participant.
  */
 
 export class Player {
-  constructor({
-    id,
-    firstName,
-    lastName,
-    nickname = '',
-    jerseyNumber = '',
-    status = 'on_bench',
-    position = null,
-    positionIndex = null,
-    pendingPosition = null,
-    pendingPositionIndex = null,
-    playTimeMs = 0,
-    fieldEntryTime = null
-  }) {
+  constructor({ id, firstName, lastName, nickname = '', jerseyNumber = '' }) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.nickname = nickname;
     this.jerseyNumber = jerseyNumber;
-    this.status = status; // 'on_field' | 'on_bench'
-    this.position = position; // Position name or null
-    this.positionIndex = positionIndex; // Slot index within position (0-based) or null
-    this.pendingPosition = pendingPosition; // Pending position name or null
-    this.pendingPositionIndex = pendingPositionIndex; // Pending slot index or null
-    this.playTimeMs = playTimeMs; // Accumulated on-field time in milliseconds
-    this.fieldEntryTime = fieldEntryTime; // Timestamp when player entered the field (null if on bench)
   }
 
   /**
@@ -47,125 +27,16 @@ export class Player {
     return `${this.firstName} ${this.lastName}`;
   }
 
-  /**
-   * Check if player is on the field
-   * @returns {boolean}
-   */
-  isOnField() {
-    return this.status === 'on_field' && this.position !== null;
-  }
-
-  /**
-   * Check if player is on the bench
-   * @returns {boolean}
-   */
-  isOnBench() {
-    return this.status === 'on_bench';
-  }
-
-  /**
-   * Assign player to a position
-   * @param {string} positionName
-   * @param {number|null} slotIndex - Optional slot index within position
-   */
-  assignToPosition(positionName, slotIndex = null) {
-    this.position = positionName;
-    this.positionIndex = slotIndex;
-    this.status = 'on_field';
-  }
-
-  /**
-   * Move player to bench
-   */
-  moveToBench() {
-    if (this.fieldEntryTime !== null) {
-      this.playTimeMs += Date.now() - this.fieldEntryTime;
-      this.fieldEntryTime = null;
-    }
-    this.position = null;
-    this.positionIndex = null;
-    this.status = 'on_bench';
-  }
-
-  /**
-   * Assign player to a pending position
-   * @param {string} positionName
-   * @param {number|null} slotIndex - Optional slot index within position
-   */
-  assignToPendingPosition(positionName, slotIndex = null) {
-    this.pendingPosition = positionName;
-    this.pendingPositionIndex = slotIndex;
-  }
-
-  /**
-   * Clear pending position
-   */
-  clearPendingPosition() {
-    this.pendingPosition = null;
-    this.pendingPositionIndex = null;
-  }
-
-  /**
-   * Apply pending position (move pending to active)
-   */
-  applyPendingPosition() {
-    if (this.pendingPosition !== null) {
-      this.position = this.pendingPosition;
-      this.positionIndex = this.pendingPositionIndex;
-      this.status = 'on_field';
-      this.pendingPosition = null;
-      this.pendingPositionIndex = null;
-    } else {
-      // If no pending position, move to bench
-      this.moveToBench();
-    }
-  }
-
-  /**
-   * Get total play time in milliseconds (including current stint if on field)
-   * @returns {number}
-   */
-  getCurrentPlayTimeMs() {
-    if (this.fieldEntryTime !== null) {
-      return this.playTimeMs + (Date.now() - this.fieldEntryTime);
-    }
-    return this.playTimeMs;
-  }
-
-  /**
-   * Reset play time tracking (for new game)
-   */
-  resetPlayTime() {
-    this.playTimeMs = 0;
-    this.fieldEntryTime = this.isOnField() ? Date.now() : null;
-  }
-
-  /**
-   * Create a plain object from player (for serialization)
-   * @returns {Object}
-   */
   toJSON() {
     return {
       id: this.id,
       firstName: this.firstName,
       lastName: this.lastName,
       nickname: this.nickname,
-      jerseyNumber: this.jerseyNumber,
-      status: this.status,
-      position: this.position,
-      positionIndex: this.positionIndex,
-      pendingPosition: this.pendingPosition,
-      pendingPositionIndex: this.pendingPositionIndex,
-      playTimeMs: this.playTimeMs,
-      fieldEntryTime: this.fieldEntryTime
+      jerseyNumber: this.jerseyNumber
     };
   }
 
-  /**
-   * Create player from plain object
-   * @param {Object} data
-   * @returns {Player}
-   */
   static fromJSON(data) {
     return new Player(data);
   }

@@ -1,37 +1,32 @@
 /**
  * Sport Model
- * Represents a sport with its positions and configurations
+ * Represents a sport with its positions and preset formations
  */
 
 export class Sport {
-  constructor({ id, name, minPlayers, maxPlayers, positions, formations }) {
+  constructor({ id, name, teamSizes, positions, formations }) {
     this.id = id;
     this.name = name;
-    this.minPlayers = minPlayers;
-    this.maxPlayers = maxPlayers;
-    this.positions = positions; // Array of Position objects
-    this.formations = formations; // Object with formation configurations
+    this.teamSizes = teamSizes; // Preset field sizes, e.g. [7, 9, 11]
+    this.positions = positions; // Array of Position objects, defensive first
+    this.formations = formations; // { '7v7': Formation[], ... }
   }
 
   /**
-   * Get available team sizes for this sport
-   * @returns {number[]} Array of valid team sizes
+   * Preset team sizes offered for this sport
+   * @returns {number[]}
    */
   getAvailableTeamSizes() {
-    return Array.from(
-      { length: this.maxPlayers - this.minPlayers + 1 },
-      (_, i) => this.minPlayers + i
-    );
+    return this.teamSizes;
   }
 
   /**
    * Get formations for a specific team size
    * @param {number} teamSize
-   * @returns {Formation[]} Array of formations
+   * @returns {Formation[]}
    */
   getFormationsForTeamSize(teamSize) {
-    const key = `${teamSize}v${teamSize}`;
-    return this.formations[key] || [];
+    return this.formations[`${teamSize}v${teamSize}`] || [];
   }
 
   /**
@@ -41,15 +36,6 @@ export class Sport {
    */
   getPosition(positionName) {
     return this.positions.find(p => p.name === positionName);
-  }
-
-  /**
-   * Validate if team size is valid for this sport
-   * @param {number} teamSize
-   * @returns {boolean}
-   */
-  isValidTeamSize(teamSize) {
-    return teamSize >= this.minPlayers && teamSize <= this.maxPlayers;
   }
 }
 

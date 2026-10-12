@@ -1,6 +1,7 @@
 <script>
   let {
     variant = 'primary',
+    type = 'button',
     disabled = false,
     onclick,
     children
@@ -15,6 +16,7 @@
 </script>
 
 <button
+  {type}
   class={`px-4 py-2 rounded-lg font-medium transition-colors ${variants[variant]} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
   {disabled}
   {onclick}

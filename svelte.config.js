@@ -15,6 +15,9 @@ export default {
       precompress: true,
       strict: true
     }),
+    router: {
+      type: 'hash'
+    },
     serviceWorker: {
       register: false
     },

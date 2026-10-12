@@ -1,5 +1,6 @@
 <script>
   import { getDisplayName } from '$lib/utils/displayName.js';
+  import { createTouchDrag, readDropPayload } from '$lib/utils/touchDrag.js';
 
   let {
     position,
@@ -50,84 +51,24 @@
     e.dataTransfer.dropEffect = 'move';
   }
 
-  function handleDrop(e, slotIndex) {
-    e.preventDefault();
-    const data = JSON.parse(e.dataTransfer.getData('application/json'));
-    
-    if (onDropPlayer) {
-      const currentPlayer = slots[slotIndex];
-      onDropPlayer(data.playerId, position.name, slotIndex, currentPlayer?.id, data.sourcePosition, data.sourceSlotIndex);
-    }
+  function dropOnSlot(payload, slotIndex) {
+    if (!payload || !onDropPlayer) return;
+    onDropPlayer(payload.playerId, position.name, slotIndex, slots[slotIndex]?.id);
   }
 
   function handleDragStart(e, player, slotIndex) {
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify({
-      playerId: player.id,
-      sourceType: 'field',
-      sourcePosition: position.name,
-      sourceSlotIndex: slotIndex
-    }));
+    e.dataTransfer.setData('application/json', JSON.stringify(slotPayload(player, slotIndex)));
   }
 
-  // Touch event handlers for mobile support
-  let touchStartData = null;
-
-  function handleTouchStart(e, player, slotIndex) {
-    if (!player) return;
-    e.preventDefault();
-    touchStartData = {
-      playerId: player.id,
-      sourceType: 'field',
-      sourcePosition: position.name,
-      sourceSlotIndex: slotIndex,
-      startX: e.touches[0].clientX,
-      startY: e.touches[0].clientY
-    };
-    // Add visual feedback
-    e.currentTarget.style.opacity = '0.5';
+  function slotPayload(player, slotIndex) {
+    return { playerId: player.id, sourceType: 'field', sourcePosition: position.name, sourceSlotIndex: slotIndex };
   }
 
-  function handleTouchMove(e) {
-    if (!touchStartData) return;
-    e.preventDefault();
-  }
-
-  function handleTouchEnd(e, slotIndex) {
-    if (!touchStartData) return;
-    e.preventDefault();
-    
-    // Reset visual feedback on source
-    const sourceElements = document.querySelectorAll('[style*="opacity: 0.5"]');
-    sourceElements.forEach(el => el.style.opacity = '');
-    
-    // Find the element at the touch end position
-    const touch = e.changedTouches[0];
-    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-    
-    if (targetElement) {
-      // Find the closest button with data-slot attribute
-      const dropTarget = targetElement.closest('[data-slot-index]');
-      if (dropTarget && onDropPlayer) {
-        const targetSlotIndex = parseInt(dropTarget.getAttribute('data-slot-index'));
-        const targetPosition = dropTarget.getAttribute('data-position');
-        
-        if (targetPosition === position.name) {
-          const currentPlayer = slots[targetSlotIndex];
-          onDropPlayer(
-            touchStartData.playerId,
-            position.name,
-            targetSlotIndex,
-            currentPlayer?.id,
-            touchStartData.sourcePosition,
-            touchStartData.sourceSlotIndex
-          );
-        }
-      }
-    }
-    
-    touchStartData = null;
-  }
+  // One touch tracker per slot, rebuilt when the slot count changes.
+  const touches = $derived(
+    slots.map((_, idx) => createTouchDrag(() => (slots[idx] ? slotPayload(slots[idx], idx) : null)))
+  );
 </script>
 
 <div class="bg-green-800 rounded-lg p-3">
@@ -141,18 +82,21 @@
   <div class="flex flex-wrap gap-2 justify-center">
     {#each slots as player, idx (idx)}
       <button
-        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] w-[180px] flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
+        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] w-[180px] touch-none flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
           substitutingPlayerId === player?.id ? 'ring-4 ring-white' : ''
         } ${!player ? 'border-2 border-dashed border-white/70' : ''}`}
         onclick={() => player && onPlayerClick?.(player.id)}
-        disabled={!player}
+        aria-disabled={!player}
         ondragover={handleDragOver}
-        ondrop={(e) => handleDrop(e, idx)}
+        ondrop={(e) => { e.preventDefault(); dropOnSlot(readDropPayload(e), idx); }}
+        onplayertouchdrop={(e) => dropOnSlot(e.detail, idx)}
         draggable={!!player}
         ondragstart={(e) => player && handleDragStart(e, player, idx)}
-        ontouchstart={(e) => handleTouchStart(e, player, idx)}
-        ontouchmove={handleTouchMove}
-        ontouchend={(e) => handleTouchEnd(e, idx)}
+        ontouchstart={touches[idx].start}
+        ontouchmove={touches[idx].move}
+        ontouchend={touches[idx].end}
+        ontouchcancel={touches[idx].cancel}
+        data-drop-zone
         data-slot-index={idx}
         data-position={position.name}
       >

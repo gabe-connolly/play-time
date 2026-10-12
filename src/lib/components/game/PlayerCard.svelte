@@ -2,6 +2,7 @@
   import { Edit2, X } from 'lucide-svelte';
   import { getDisplayName } from '$lib/utils/displayName.js';
   import { formatPlayTime } from '$lib/utils/formatTime.js';
+  import { createTouchDrag } from '$lib/utils/touchDrag.js';
 
   let {
     player,
@@ -9,7 +10,7 @@
     isSelected = false,
     showActions = false,
     showPlayTime = false,
-    playTimeTick = 0,
+    clockMs = 0,
     draggable = false,
     sourceType = 'bench',
     onSelect = null,
@@ -17,11 +18,7 @@
     onDelete = null
   } = $props();
 
-  const currentPlayTime = $derived.by(() => {
-    // Reference playTimeTick to re-derive when it changes
-    void playTimeTick;
-    return showPlayTime ? player.getCurrentPlayTimeMs() : 0;
-  });
+  const currentPlayTime = $derived(showPlayTime ? player.getPlayTimeMs(clockMs) : 0);
 
   function handleDragStart(e) {
     if (!draggable) return;
@@ -32,60 +29,16 @@
     }));
   }
 
-  // Touch event handlers for mobile support
-  let touchStartData = null;
-
-  function handleTouchStart(e) {
-    if (!draggable) return;
-    e.preventDefault();
-    touchStartData = {
-      playerId: player.id,
-      sourceType: sourceType,
-      startX: e.touches[0].clientX,
-      startY: e.touches[0].clientY
-    };
-    e.currentTarget.style.opacity = '0.5';
-  }
-
-  function handleTouchMove(e) {
-    if (!touchStartData) return;
-    e.preventDefault();
-  }
-
-  function handleTouchEnd(e) {
-    if (!touchStartData) return;
-    e.preventDefault();
-    
-    // Reset visual feedback
-    e.currentTarget.style.opacity = '';
-    
-    // Find the element at the touch end position
-    const touch = e.changedTouches[0];
-    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-    
-    if (targetElement) {
-      // Find the closest button with data-slot attribute
-      const dropTarget = targetElement.closest('[data-slot-index]');
-      if (dropTarget) {
-        const event = new CustomEvent('benchPlayerDrop', {
-          detail: {
-            playerId: touchStartData.playerId,
-            targetElement: dropTarget
-          },
-          bubbles: true
-        });
-        dropTarget.dispatchEvent(event);
-      }
-    }
-    
-    touchStartData = null;
-  }
+  const touch = createTouchDrag(
+    () => (draggable ? { playerId: player.id, sourceType } : null),
+    { verticalScrolls: true }
+  );
 </script>
 
 <div
   class={`flex items-center justify-between p-3 rounded-lg transition-colors ${
     onSelect ? 'cursor-pointer' : ''
-  } ${draggable ? 'cursor-move' : ''} ${
+  } ${draggable ? 'cursor-move touch-pan-y' : ''} ${
     isSelected ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50 hover:bg-gray-100'
   }`}
   onclick={() => onSelect?.(player.id)}
@@ -93,9 +46,10 @@
   tabindex={onSelect ? 0 : undefined}
   draggable={draggable}
   ondragstart={handleDragStart}
-  ontouchstart={handleTouchStart}
-  ontouchmove={handleTouchMove}
-  ontouchend={handleTouchEnd}
+  ontouchstart={touch.start}
+  ontouchmove={touch.move}
+  ontouchend={touch.end}
+  ontouchcancel={touch.cancel}
 >
   <div class="flex items-center gap-2">
     <div>

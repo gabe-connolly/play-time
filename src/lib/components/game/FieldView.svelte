@@ -50,7 +50,7 @@
 <div class="bg-green-900 rounded-lg p-4 mb-4">
   <div class="flex items-center justify-between mb-4">
     <!-- Left: label -->
-    <h2 class="text-white text-lg font-bold w-28">
+    <h2 class="text-white text-lg font-bold min-w-28">
       {isPendingMode ? 'Pending' : 'Field'}
     </h2>
 
@@ -83,7 +83,7 @@
     </div>
 
     <!-- Right: sub actions -->
-    <div class="w-28 flex justify-end gap-1.5">
+    <div class="min-w-28 flex justify-end gap-1.5 whitespace-nowrap">
       {#if hasPendingWork}
         <button
           class="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/90 text-green-900 hover:bg-white transition-colors"

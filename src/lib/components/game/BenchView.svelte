@@ -1,5 +1,6 @@
 <script>
   import PlayerCard from './PlayerCard.svelte';
+  import { readDropPayload } from '$lib/utils/touchDrag.js';
 
   let {
     players,
@@ -9,7 +10,7 @@
     selectedPlayerId = null,
     isSubstituting = false,
     showPlayTime = false,
-    playTimeTick = 0,
+    clockMs = 0,
     onSelectPlayer,
     onAssignPosition,
     onDropToBench = null
@@ -22,17 +23,19 @@
     e.dataTransfer.dropEffect = 'move';
   }
 
+  function dropOnBench(payload) {
+    if (payload?.sourceType === 'field' && onDropToBench) {
+      onDropToBench(payload.playerId);
+    }
+  }
+
   function handleDrop(e) {
     e.preventDefault();
-    const data = JSON.parse(e.dataTransfer.getData('application/json'));
-    
-    if (data.sourceType === 'field' && onDropToBench) {
-      onDropToBench(data.playerId);
-    }
+    dropOnBench(readDropPayload(e));
   }
 </script>
 
-<div class="bg-white rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop} role="region" aria-label="Bench drop zone">
+<div class="bg-white rounded-lg p-4" ondragover={handleDragOver} ondrop={handleDrop} onplayertouchdrop={(e) => dropOnBench(e.detail)} data-drop-zone role="region" aria-label="Bench drop zone">
   <h2 class="text-xl font-bold mb-3">Bench ({benchPlayers.length})</h2>
 
   {#if benchPlayers.length === 0}
@@ -45,7 +48,7 @@
           {displayFormat}
           isSelected={selectedPlayerId === player.id}
           {showPlayTime}
-          {playTimeTick}
+          {clockMs}
           onSelect={onSelectPlayer}
           draggable={!isSubstituting}
         />

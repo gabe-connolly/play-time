@@ -33,68 +33,29 @@ const soccerFormations = {
 export const SOCCER = new Sport({
   id: 'soccer',
   name: 'Soccer',
-  minPlayers: 7,
-  maxPlayers: 11,
+  teamSizes: [7, 9, 11],
   positions: soccerPositions,
   formations: soccerFormations
 });
 
-/**
- * Field Hockey Sport Configuration
- */
-const fieldHockeyPositions = [
-  new Position({ name: 'Goalkeeper', abbr: 'GK', color: 'bg-yellow-200', defaultCount: 1 }),
-  new Position({ name: 'Defender', abbr: 'DEF', color: 'bg-blue-200', defaultCount: 3 }),
-  new Position({ name: 'Midfielder', abbr: 'MID', color: 'bg-green-200', defaultCount: 3 }),
-  new Position({ name: 'Forward', abbr: 'FWD', color: 'bg-red-200', defaultCount: 3 })
+/** Upper bound for any single position in a custom lineup. */
+export const MAX_CUSTOM_POSITION_COUNT = 6;
+
+/** Period counts a game can be split into, with the label for one period. */
+export const PERIOD_OPTIONS = [
+  { count: 2, label: 'Halves', short: 'H' },
+  { count: 3, label: 'Thirds', short: 'P' },
+  { count: 4, label: 'Quarters', short: 'Q' }
 ];
 
-const fieldHockeyFormations = {
-  '6v6': [
-    new Formation({ name: '1-2-2', positions: { Goalkeeper: 1, Defender: 1, Midfielder: 2, Forward: 2 } }),
-    new Formation({ name: '2-1-2', positions: { Goalkeeper: 1, Defender: 2, Midfielder: 1, Forward: 2 } })
-  ],
-  '7v7': [
-    new Formation({ name: '2-2-2', positions: { Goalkeeper: 1, Defender: 2, Midfielder: 2, Forward: 2 } }),
-    new Formation({ name: '2-3-1', positions: { Goalkeeper: 1, Defender: 2, Midfielder: 3, Forward: 1 } })
-  ],
-  '11v11': [
-    new Formation({ name: '3-3-3', positions: { Goalkeeper: 1, Defender: 3, Midfielder: 3, Forward: 3 } }),
-    new Formation({ name: '4-3-3', positions: { Goalkeeper: 1, Defender: 4, Midfielder: 3, Forward: 3 } }),
-    new Formation({ name: '3-4-3', positions: { Goalkeeper: 1, Defender: 3, Midfielder: 4, Forward: 3 } })
-  ]
-};
-
-export const FIELD_HOCKEY = new Sport({
-  id: 'field_hockey',
-  name: 'Field Hockey',
-  minPlayers: 6,
-  maxPlayers: 11,
-  positions: fieldHockeyPositions,
-  formations: fieldHockeyFormations
-});
-
 /**
- * All available sports
+ * Human label for a period, e.g. "1st Half", "Q3", "Period 2".
+ * @param {number} index - zero-based period index
+ * @param {number} count - total periods in the game
  */
-export const SPORTS = {
-  soccer: SOCCER,
-  field_hockey: FIELD_HOCKEY
-};
-
-/**
- * Get sport by ID
- * @param {string} sportId
- * @returns {Sport|undefined}
- */
-export function getSportById(sportId) {
-  return SPORTS[sportId];
-}
-
-/**
- * Get all sports as array
- * @returns {Sport[]}
- */
-export function getAllSports() {
-  return Object.values(SPORTS);
+export function periodLabel(index, count) {
+  const n = index + 1;
+  if (count === 2) return n === 1 ? '1st Half' : '2nd Half';
+  if (count === 4) return `Q${n}`;
+  return `Period ${n}`;
 }

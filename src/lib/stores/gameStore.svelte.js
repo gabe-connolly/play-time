@@ -1,86 +1,51 @@
 /**
- * Game Store - Manages game state using Svelte 5 Runes
+ * Game UI Store - transient game-screen state and the side countdown timer.
+ * Game data itself lives in appStore.
  */
-import { saveGameState, loadGameState } from '../utils/storage.js';
 
-// Game view state
-let currentView = $state('setup'); // 'setup' | 'game'
-let displayFormat = $state('full'); // 'full' | 'nickname' | 'last'
-let substituting = $state(null); // Player ID being substituted
-let selectedBenchPlayer = $state(null); // Selected bench player for substitution
+const TIMER_KEY = 'play_time_side_timer';
+
+let substituting = $state(null); // Participant id being subbed out
+let selectedBenchPlayer = $state(null); // Bench participant picked for a slot
 let fieldMode = $state('active'); // 'active' | 'pending'
 let playerListView = $state('bench'); // 'bench' | 'roster'
 
-// Game clock (counts up, tracks total game time + player play times)
-let clockRunning = $state(false);
-let clockStartedAt = $state(null);
-let clockElapsedBeforePause = $state(0);
-
-// Countdown timer (independent utility timer)
+// Countdown timer (independent utility timer, e.g. for sub rotations)
 let timerRunning = $state(false);
 let timerStartedAt = $state(null);
 let timerElapsedBeforePause = $state(0);
 let timerDurationMs = $state(0);
 
-function persist() {
-  saveGameState({
-    currentView,
-    displayFormat,
-    fieldMode,
-    playerListView,
-    clockRunning,
-    clockStartedAt,
-    clockElapsedBeforePause,
-    timerRunning,
-    timerStartedAt,
-    timerElapsedBeforePause,
-    timerDurationMs
-  });
+function persistTimer() {
+  try {
+    localStorage.setItem(
+      TIMER_KEY,
+      JSON.stringify({ timerRunning, timerStartedAt, timerElapsedBeforePause, timerDurationMs })
+    );
+  } catch {
+    // Timer state is a convenience; losing it is harmless.
+  }
 }
 
-/**
- * Restore game state from localStorage
- */
-export function restoreGameState() {
-  const saved = loadGameState();
-  if (saved) {
-    currentView = saved.currentView || 'setup';
-    displayFormat = saved.displayFormat || 'full';
-    fieldMode = saved.fieldMode || 'active';
-    playerListView = saved.playerListView || 'bench';
-    clockRunning = saved.clockRunning || false;
-    clockStartedAt = saved.clockStartedAt || null;
-    clockElapsedBeforePause = saved.clockElapsedBeforePause || 0;
+export function restoreTimer() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TIMER_KEY) || 'null');
+    if (!saved) return;
     timerRunning = saved.timerRunning || false;
     timerStartedAt = saved.timerStartedAt || null;
     timerElapsedBeforePause = saved.timerElapsedBeforePause || 0;
     timerDurationMs = saved.timerDurationMs || 0;
-    return true;
+  } catch {
+    // Ignore corrupt timer state.
   }
-  return false;
 }
 
-// --- Navigation ---
-
-export function goToSetup() {
-  currentView = 'setup';
+/** Reset per-game UI state when entering a game screen. */
+export function resetGameUi() {
   substituting = null;
   selectedBenchPlayer = null;
   fieldMode = 'active';
   playerListView = 'bench';
-  persist();
-}
-
-export function goToGame() {
-  currentView = 'game';
-  persist();
-}
-
-// --- Display ---
-
-export function setDisplayFormat(format) {
-  displayFormat = format;
-  persist();
 }
 
 // --- Substitution ---
@@ -99,132 +64,6 @@ export function cancelSubstitution() {
   selectedBenchPlayer = null;
 }
 
-// --- Field mode ---
-
-export function setFieldMode(mode) {
-  fieldMode = mode;
-  persist();
-}
-
-export function getFieldMode() {
-  return fieldMode;
-}
-
-export function isPendingMode() {
-  return fieldMode === 'pending';
-}
-
-// --- Player list ---
-
-export function setPlayerListView(view) {
-  playerListView = view;
-  persist();
-}
-
-export function getPlayerListView() {
-  return playerListView;
-}
-
-// --- Game Clock ---
-
-export function setClockRunning(running) {
-  if (running && !clockRunning) {
-    clockStartedAt = Date.now();
-  } else if (!running && clockRunning) {
-    if (clockStartedAt !== null) {
-      clockElapsedBeforePause += Date.now() - clockStartedAt;
-    }
-    clockStartedAt = null;
-  }
-  clockRunning = running;
-  persist();
-}
-
-export function getClockRunning() {
-  return clockRunning;
-}
-
-export function getGameClockMs() {
-  if (clockRunning && clockStartedAt !== null) {
-    return clockElapsedBeforePause + (Date.now() - clockStartedAt);
-  }
-  return clockElapsedBeforePause;
-}
-
-export function resetGameClock() {
-  clockRunning = false;
-  clockStartedAt = null;
-  clockElapsedBeforePause = 0;
-  persist();
-}
-
-// --- Countdown Timer ---
-
-export function startTimer(durationMs = null) {
-  if (durationMs !== null) {
-    timerDurationMs = durationMs;
-    timerElapsedBeforePause = 0;
-  }
-  if (timerDurationMs <= 0) return;
-  timerStartedAt = Date.now();
-  timerRunning = true;
-  persist();
-}
-
-export function stopTimer() {
-  if (timerRunning && timerStartedAt !== null) {
-    timerElapsedBeforePause += Date.now() - timerStartedAt;
-  }
-  timerStartedAt = null;
-  timerRunning = false;
-  persist();
-}
-
-export function resetTimer() {
-  timerRunning = false;
-  timerStartedAt = null;
-  timerElapsedBeforePause = 0;
-  timerDurationMs = 0;
-  persist();
-}
-
-export function getTimerRunning() {
-  return timerRunning;
-}
-
-export function getTimerDurationMs() {
-  return timerDurationMs;
-}
-
-/**
- * Get remaining time in ms. Returns 0 when expired.
- */
-export function getTimerRemainingMs() {
-  let elapsed = timerElapsedBeforePause;
-  if (timerRunning && timerStartedAt !== null) {
-    elapsed += Date.now() - timerStartedAt;
-  }
-  const remaining = timerDurationMs - elapsed;
-  return remaining > 0 ? remaining : 0;
-}
-
-/**
- * Check if timer has expired
- */
-export function isTimerExpired() {
-  return timerDurationMs > 0 && getTimerRemainingMs() <= 0;
-}
-
-// --- Reactive getters ---
-
-export function getCurrentView() {
-  return currentView;
-}
-
-export function getDisplayFormat() {
-  return displayFormat;
-}
-
 export function getSubstitutingPlayer() {
   return substituting;
 }
@@ -237,20 +76,73 @@ export function isSubstituting() {
   return substituting !== null;
 }
 
-// --- Reset ---
+// --- Field mode ---
 
-export function resetGameState() {
-  currentView = 'setup';
-  displayFormat = 'full';
-  substituting = null;
-  selectedBenchPlayer = null;
-  fieldMode = 'active';
-  playerListView = 'bench';
-  clockRunning = false;
-  clockStartedAt = null;
-  clockElapsedBeforePause = 0;
+export function setFieldMode(mode) {
+  fieldMode = mode;
+}
+
+export function getFieldMode() {
+  return fieldMode;
+}
+
+// --- Player list ---
+
+export function setPlayerListView(view) {
+  playerListView = view;
+}
+
+export function getPlayerListView() {
+  return playerListView;
+}
+
+// --- Countdown Timer ---
+
+export function startTimer(durationMs = null) {
+  if (durationMs !== null) {
+    timerDurationMs = durationMs;
+    timerElapsedBeforePause = 0;
+  }
+  if (timerDurationMs <= 0) return;
+  timerStartedAt = Date.now();
+  timerRunning = true;
+  persistTimer();
+}
+
+export function stopTimer() {
+  if (timerRunning && timerStartedAt !== null) {
+    timerElapsedBeforePause += Date.now() - timerStartedAt;
+  }
+  timerStartedAt = null;
+  timerRunning = false;
+  persistTimer();
+}
+
+export function resetTimer() {
   timerRunning = false;
   timerStartedAt = null;
   timerElapsedBeforePause = 0;
   timerDurationMs = 0;
+  persistTimer();
+}
+
+export function getTimerRunning() {
+  return timerRunning;
+}
+
+export function getTimerDurationMs() {
+  return timerDurationMs;
+}
+
+/** Remaining time in ms; 0 when expired. */
+export function getTimerRemainingMs() {
+  let elapsed = timerElapsedBeforePause;
+  if (timerRunning && timerStartedAt !== null) {
+    elapsed += Date.now() - timerStartedAt;
+  }
+  return Math.max(0, timerDurationMs - elapsed);
+}
+
+export function isTimerExpired() {
+  return timerDurationMs > 0 && getTimerRemainingMs() <= 0;
 }
