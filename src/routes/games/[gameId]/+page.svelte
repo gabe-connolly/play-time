@@ -247,10 +247,10 @@
     <a class="text-blue-800 underline" href={href('/')}>Back to teams</a>
   </div>
 {:else}
-  <div class="min-h-screen bg-gray-100 p-3">
-    <div class="max-w-[1400px] mx-auto">
+  <div class="h-dvh bg-gray-100 p-3 flex flex-col">
+    <div class="max-w-[1400px] w-full mx-auto flex-1 min-h-0 flex flex-col">
       <!-- Header -->
-      <div class="bg-white rounded-lg shadow mb-3 px-3 py-2 flex items-center gap-3 flex-wrap">
+      <div class="bg-white rounded-lg shadow mb-3 px-3 py-2 flex items-center gap-3 flex-wrap shrink-0">
         <a
           href={href(`/teams/${game.teamId}`)}
           class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 text-sm shrink-0"
@@ -343,8 +343,8 @@
       </div>
 
       <!-- Main two-column layout -->
-      <div class="flex gap-3">
-        <div class="flex-1 min-w-0">
+      <div class="flex-1 min-h-0 flex gap-3">
+        <div class="flex-1 min-w-0 flex flex-col">
           <FieldView
             {sport}
             {formation}
@@ -373,7 +373,7 @@
             />
           {/if}
 
-          <div class="text-center py-3">
+          <div class="text-center pt-2 shrink-0">
             <button class="text-sm text-gray-800 underline hover:text-gray-900" onclick={handleEndGame}>
               End game early
             </button>

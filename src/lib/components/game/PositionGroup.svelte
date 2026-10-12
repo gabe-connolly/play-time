@@ -71,13 +71,13 @@
   );
 </script>
 
-<div class="bg-green-800 rounded-lg px-3 py-2 flex items-center gap-3">
+<div class="bg-green-800 rounded-lg px-3 py-2 flex-1 flex items-center gap-3">
   <div class="w-24 shrink-0">
     <h3 class="text-white font-semibold leading-tight">{position.name}</h3>
     <span class="text-white text-sm">{players.length}/{needed}</span>
   </div>
 
-  <div class="flex-1 min-w-0 flex gap-2 justify-center">
+  <div class="flex-1 min-w-0 self-stretch flex gap-2 justify-center">
     {#each slots as player, idx (idx)}
       <button
         class={`${position.color} rounded-lg px-2 py-2 text-center min-h-[64px] flex-1 min-w-0 max-w-[180px] touch-none flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
