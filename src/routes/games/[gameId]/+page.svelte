@@ -373,16 +373,11 @@
             />
           {/if}
 
-          <div class="text-center pt-2 shrink-0">
-            <button class="text-sm text-gray-800 underline hover:text-gray-900" onclick={handleEndGame}>
-              End game early
-            </button>
-          </div>
         </div>
 
         <div class="w-80 shrink-0 flex flex-col gap-3">
-          <div class="bg-white rounded-lg shadow-lg p-4 flex-1 min-h-0 overflow-y-auto">
-            <div class="flex gap-2 mb-3">
+          <div class="bg-white rounded-lg shadow-lg flex-1 min-h-0 flex flex-col">
+            <div class="flex gap-2 p-4 pb-3 shrink-0">
               <button
                 class={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
                   playerListView === 'bench' ? 'bg-blue-800 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -400,6 +395,8 @@
                 Team
               </button>
             </div>
+
+            <div class="flex-1 min-h-0 overflow-y-auto px-4">
 
             {#if playerListView === 'bench'}
               <BenchView
@@ -427,6 +424,13 @@
                 onAddLatePlayer={handleAddLatePlayer}
               />
             {/if}
+            </div>
+
+            <div class="shrink-0 border-t border-gray-200 p-2 text-center">
+              <button class="min-h-12 px-4 text-base text-gray-800 underline hover:text-gray-900" onclick={handleEndGame}>
+                End game early
+              </button>
+            </div>
           </div>
         </div>
       </div>
