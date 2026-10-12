@@ -71,18 +71,16 @@
   );
 </script>
 
-<div class="bg-green-800 rounded-lg p-3">
-  <div class="flex items-center justify-between mb-2">
-    <h3 class="text-white font-semibold">{position.name}</h3>
-    <span class="text-white text-sm">
-      {players.length}/{needed}
-    </span>
+<div class="bg-green-800 rounded-lg px-3 py-2 flex items-center gap-3">
+  <div class="w-24 shrink-0">
+    <h3 class="text-white font-semibold leading-tight">{position.name}</h3>
+    <span class="text-white text-sm">{players.length}/{needed}</span>
   </div>
 
-  <div class="flex flex-wrap gap-2 justify-center">
+  <div class="flex-1 min-w-0 flex gap-2 justify-center">
     {#each slots as player, idx (idx)}
       <button
-        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] w-[180px] touch-none flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
+        class={`${position.color} rounded-lg px-2 py-2 text-center min-h-[64px] flex-1 min-w-0 max-w-[180px] touch-none flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
           substitutingPlayerId === player?.id ? 'ring-4 ring-white' : ''
         } ${!player ? 'border-2 border-dashed border-white/70' : ''}`}
         onclick={() => player && onPlayerClick?.(player.id)}
@@ -100,21 +98,16 @@
         data-slot-index={idx}
         data-position={position.name}
       >
-        {#if player}
-          <div class="text-xs text-gray-800 mb-1">{getDirectionalLabel(idx, needed)}</div>
-          <div class="font-semibold text-sm">
-            {getDisplayName(player, displayFormat)}
-          </div>
-          {#if player.jerseyNumber}
-            <div class="text-xs mt-1">#{player.jerseyNumber}</div>
-          {/if}
-          {#if substitutingPlayerId === player.id}
-            <div class="text-xs mt-1 px-1.5 rounded bg-red-900 text-white font-bold">
-              Subbing out
-            </div>
-          {/if}
+        {#if player && substitutingPlayerId === player.id}
+          <div class="text-xs px-1.5 rounded bg-red-900 text-white font-bold">Subbing out</div>
         {:else}
-          <div class="text-xs text-gray-800 mb-1">{getDirectionalLabel(idx, needed)}</div>
+          <div class="text-xs text-gray-800">{getDirectionalLabel(idx, needed)}</div>
+        {/if}
+        {#if player}
+          <div class="font-semibold text-sm text-gray-900 truncate max-w-full">
+            {getDisplayName(player, displayFormat)}{#if player.jerseyNumber}<span class="font-normal ml-1">#{player.jerseyNumber}</span>{/if}
+          </div>
+        {:else}
           <div class="text-sm text-gray-800">Empty</div>
         {/if}
       </button>

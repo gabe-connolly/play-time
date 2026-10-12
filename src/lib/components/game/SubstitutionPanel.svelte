@@ -13,7 +13,7 @@
   const canComplete = $derived(selectedBenchPlayerId !== null);
 </script>
 
-<div class="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+<div class="fixed bottom-4 left-4 z-40 w-[min(36rem,calc(100vw-23rem))] bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 shadow-2xl" role="dialog" aria-label="Substitution">
   <h3 class="font-bold text-lg mb-2">Select Substitute</h3>
   <p class="text-sm text-gray-700 mb-3">
     Subbing out: <strong>{getDisplayName(substitutingPlayer, displayFormat)}</strong>

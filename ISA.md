@@ -2,7 +2,7 @@
 slug: play-time
 project: ~/projects/personal/play-time
 phase: climbing
-progress: 18/24
+progress: 22/24
 principal_stated_goal: "I want to take the app as it as as just a proof of concept, and take it to the next level by building it as an app that can be fully shipped on the Google play store."
 ---
 
@@ -45,11 +45,11 @@ Why: every game differs (length, format, who showed up), so config belongs to th
 
 ### F3 · Game management
 Why: the sideline screen is the product. It has to do everything the PoC did, plus know about periods.
-- [ ] C6: The PoC game features all still work: the field with position groups, the Bench and Team tabs, quick sub, Prepare Subs / Pending / Sub Now / Discard, drag-and-drop, and the 5/10/15m side timer. — browser: tap quick-sub, Prepare/Sub Now, Team tab, timer verified; touch drag on device pending unlock [DEFERRED-VERIFY]
+- [x] C6: The PoC game features all still work: the field with position groups, the Bench and Team tabs, quick sub, Prepare Subs / Pending / Sub Now / Discard, drag-and-drop, and the 5/10/15m side timer. — device: real adb taps select/assign and open sub panel, adb swipes drag bench→GK/MID/DEF slots, Complete Substitution by tap
 - [x] C7: The clock counts down per period. At 0:00 it auto-pauses and offers "Start period N+1", or "End game" after the last period. — browser: 1st Half hit 0:00, auto-paused, Start 2nd Half shown; GameClock.test 8/8
 - [x] C8: Playtime only accrues while the game clock runs. Restoring a game whose clock was left running can't add more than the rest of the current period. (The 290737-minute bug can't recur.) — Game.test runaway-timer case (202 days → 20 min cap); browser reload mid-run kept counting
 - [x] C9: A player can be toggled in or out mid-game. Marking a player out takes them off the field and bench and keeps their minutes. Marking them back in returns them to the bench. — browser: Dee marked out froze at 0:13, Back in offered; Hal Arrived joined at halftime
-- [ ] C10: The screen stays awake while the game is live on Android. [DEFERRED-VERIFY] — needs unlocked tablet
+- [x] C10: The screen stays awake while the game is live on Android. — device: dumpsys window shows KEEP_SCREEN_ON on the live game, absent on the summary screen
 
 ### F4 · History
 Why: fair playtime is a season-long promise, so a finished game must outlive the screen.
@@ -60,15 +60,15 @@ Why: fair playtime is a season-long promise, so a finished game must outlive the
 Why: on-device data is only trustworthy if it survives upgrades and can move between tablets.
 - [x] C13: Storage is one schema-versioned document. It uses Capacitor Preferences on native and localStorage on the web. — device: Preferences doc read back (1 team, 7 players); web: localStorage play_time_doc
 - [x] C14: v1 data (`field_coach_team`) migrates automatically into one team with stale timers dropped. Import also accepts the v1 format. — browser: seeded field_coach_team → U10 Comets 9 players; device: Gabriel roster migrated via schema.normalizeDoc
-- [ ] C15: Export → import round-trips every team, player and game unchanged. On native the export file goes out through the share sheet. — schema.test round-trip passes; browser import merged 1 team; native share sheet [DEFERRED-VERIFY]
+- [x] C15: Export → import round-trips every team, player and game unchanged. On native the export file goes out through the share sheet. — device: Export backup opened the Android share sheet with play-time-backup-2026-10-12.json; schema.test round-trip
 
 ### F6 · Android release
 Why: the goal is Google Play, and the store has its own definition of shippable.
 - [x] C16: The Capacitor Android project builds with `appId games.justforyou` and `appName Play Time`, and the activity is locked to landscape. — dumpsys: versionCode 1, targetSdk 36; manifest sensorLandscape; device screen.orientation landscape
 - [x] C17: The service worker isn't registered inside the native app. The web PWA still registers it. — device: serviceWorker.getRegistrations() = 0; app.html guard checks Capacitor.isNativePlatform
-- [ ] C18: A debug APK installs and runs on the Fire tablet in landscape, with Gabriel's roster migrated. — installed, DOM shows 1 team/7 players; visual [DEFERRED-VERIFY] tablet locked
+- [x] C18: A debug APK installs and runs on the Fire tablet in landscape, with Gabriel's roster migrated. — device: screencap shows My Team 7 players in landscape; data restored byte-identical after demo capture
 - [x] C19: A signed release AAB builds. The upload keystore lives outside the repo and is never committed. — jarsigner: jar verified; SHA-256 01:6F:46…13:A4; git ls-files has no jks/keystore
-- [ ] C20: The Play listing kit exists: privacy policy, data-safety answers, short and full descriptions, 512 icon, feature graphic, tablet screenshots. — store/LISTING.md, privacy policy, icon-512, feature graphic done; tablet screenshots + contact email + policy URL pending
+- [ ] C20: The Play listing kit exists: privacy policy, data-safety answers, short and full descriptions, 512 icon, feature graphic, tablet screenshots. — kit, icon, feature graphic and 5 tablet screenshots (store/screenshots, demo roster) done; contact email + public policy URL from Gabriel
 - [ ] C21: The AAB is uploaded to the internal testing track. This is outward-facing and needs Gabriel's go.
 
 ### F0 · Cross-cutting
@@ -83,6 +83,8 @@ Why: these hold across every feature.
 - [x] A3: No secrets or keystore are committed. (`git ls-files` shows no `.jks`, `.keystore` or `keystore.properties`.)
 
 ## Decisions
+- Field rows compacted (label column, single-line slots) and the substitution panel floats: on the 1280×800 tablet the old layout pushed the goalkeeper row and the sub panel below the fold. Found only on the device.
+- Store screenshots use a demo roster with a fair generated rotation; the principal's data was backed up, swapped out, restored, and compared byte-for-byte.
 - Independent review (fresh context, read-only) found 6 defects, all adopted: ghost player via substitute() with an off-field outgoing player; load error then save overwrote unreadable data (now preserved under a dated key); summary per-period cells floored separately so rows did not add up; import replaced newer team/game copies (now unions players, keeps the further game); pause at 0:00 left the period open; final games mutable at model level. Each has a regression test that failed before the fix (4 model/schema tests) or a browser probe (pending-mode ghost, corrupt-doc preservation, summary row sums).
 - Touch input rewritten (`touchDrag.js`): the PoC called preventDefault on touchstart, which swallowed taps, and its bench→field touch drop fired an event nothing listened for.
 - Dropping a bench player onto an occupied slot now substitutes; the PoC silently did nothing.
@@ -101,7 +103,6 @@ Why: these hold across every feature.
 - `@testing-library/svelte` needs `server.deps.inline` in vitest to compile its `.svelte.js` module; without it, component tests fail with `rune_outside_svelte`.
 
 ## Remaining Work
-- [ ] Unlock the tablet, then close C6 (touch drag), C10 (keep-awake), C15 (native share export) and C18 (visual), and capture the 1280×800 store screenshots for C20.
 - [ ] Gabriel supplies a contact email and the privacy-policy URL (C20).
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
 - [ ] Gabriel's go-ahead, then upload the AAB to internal testing (C21).

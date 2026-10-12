@@ -47,8 +47,8 @@
   );
 </script>
 
-<div class="bg-green-900 rounded-lg p-4 mb-4">
-  <div class="flex items-center justify-between mb-4">
+<div class="bg-green-900 rounded-lg p-3 mb-3">
+  <div class="flex items-center justify-between mb-2">
     <!-- Left: label -->
     <h2 class="text-white text-lg font-bold min-w-28">
       {isPendingMode ? 'Pending' : 'Field'}
@@ -107,7 +107,7 @@
       {/if}
     </div>
   </div>
-  <div class="space-y-4">
+  <div class="space-y-2">
     {#each positionGroups as group (group.position.name)}
       <PositionGroup
         position={group.position}
