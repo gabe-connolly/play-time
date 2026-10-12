@@ -108,6 +108,6 @@ Why: these hold across every feature.
 - [x] Play Time section added to the studio policy and deployed (just-for-you-games e3de5c9).
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
 - [x] Branch `play-store` pushed to origin.
-- [ ] Add testers to the internal track (track shows Inactive until an email list is attached).
+- [x] Internal track Active with the "Play Time internal" list (personal Gmail). Opt-in: https://play.google.com/apps/internaltest/4700861366731156800
 - [ ] Before production: store listing, app content declarations (LISTING.md has the answers), and the 12-tester 14-day closed test.
 - [ ] Uninstall the old `games.justforyou` debug app from the Fire tablet once Gabriel is happy with the new one.
