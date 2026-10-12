@@ -30,4 +30,4 @@ If this policy changes, the new version will be posted at this address with a ne
 
 ## Contact
 
-Questions: [CONTACT EMAIL]
+Questions: hello@justforyou.games

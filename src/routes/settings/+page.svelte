@@ -139,6 +139,10 @@
         Play Time collects nothing. It has no accounts, ads or analytics, and never sends your roster anywhere.
         Data leaves this device only when you export a backup.
       </p>
+      <p class="text-gray-700 mt-2">
+        Full policy: <a class="text-blue-800 underline" href="https://justforyou.games/privacy" target="_blank" rel="noopener">justforyou.games/privacy</a>
+        · Questions: <a class="text-blue-800 underline" href="mailto:hello@justforyou.games">hello@justforyou.games</a>
+      </p>
     </section>
 
     <section class="bg-white rounded-lg shadow p-5 flex items-center justify-between flex-wrap gap-3">

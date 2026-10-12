@@ -12,8 +12,8 @@ Everything Play Console asks for, ready to paste. Items marked **[YOU]** are att
 | App or game | App |
 | Free or paid | Free |
 | Category | Sports |
-| Contact email | **[YOU]** |
-| Privacy policy URL | **[YOU]** Host `store/privacy-policy.md` (or `static/privacy.html`, which ships at `/privacy.html` in the web build) at a public URL |
+| Contact email | hello@justforyou.games |
+| Privacy policy URL | https://justforyou.games/privacy (the Play Time section text lives in `store/privacy-policy.md`) |
 
 ## Short description (80 max)
 
