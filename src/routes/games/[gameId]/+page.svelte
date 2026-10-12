@@ -253,24 +253,24 @@
       <div class="bg-white rounded-lg shadow mb-3 px-3 py-2 flex items-center gap-3 flex-wrap shrink-0">
         <a
           href={href(`/teams/${game.teamId}`)}
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 text-sm shrink-0"
+          class="flex items-center gap-1.5 px-4 min-h-12 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 text-base shrink-0"
         >
-          <ChevronLeft size={16} /> {team?.name ?? 'Team'}
+          <ChevronLeft size={20} /> {team?.name ?? 'Team'}
         </a>
 
         <div class="flex-1 flex items-center justify-end gap-3 flex-wrap">
           <!-- Period clock -->
-          <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
-            <span class="text-xs font-semibold text-gray-800 uppercase tracking-wide">{currentPeriodLabel}</span>
+          <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <span class="text-sm font-semibold text-gray-800 uppercase tracking-wide">{currentPeriodLabel}</span>
             <span
-              class={`text-2xl font-mono tabular-nums font-bold ${periodOver ? 'text-red-800' : 'text-gray-900'}`}
+              class={`text-3xl font-mono tabular-nums font-bold ${periodOver ? 'text-red-800' : 'text-gray-900'}`}
               aria-live="polite"
             >
               {formatCountdown(remainingMs)}
             </span>
             {#if !periodOver}
               <button
-                class={`px-3 py-1 rounded font-semibold text-sm transition-colors ${
+                class={`px-5 min-h-12 rounded-lg font-semibold text-base transition-colors ${
                   clockRunning ? 'bg-red-800 text-white hover:bg-red-900' : 'bg-green-800 text-white hover:bg-green-900'
                 }`}
                 onclick={handleToggleClock}
@@ -278,37 +278,37 @@
                 {clockRunning ? 'Pause' : clock.periodElapsedMs(now) > 0 ? 'Resume' : 'Start'}
               </button>
               <button
-                class="px-2.5 py-1 rounded font-medium text-xs bg-gray-200 text-gray-800 hover:bg-gray-300"
+                class="px-4 min-h-12 rounded-lg font-medium text-base bg-gray-200 text-gray-800 hover:bg-gray-300"
                 onclick={handleEndPeriod}
               >
                 End {currentPeriodLabel}
               </button>
             {:else if nextPeriodLabel}
               <button
-                class="px-3 py-1 rounded font-semibold text-sm bg-green-800 text-white hover:bg-green-900"
+                class="px-5 min-h-12 rounded-lg font-semibold text-base bg-green-800 text-white hover:bg-green-900"
                 onclick={handleStartNextPeriod}
               >
                 Start {nextPeriodLabel}
               </button>
             {:else}
               <button
-                class="flex items-center gap-1.5 px-3 py-1 rounded font-semibold text-sm bg-blue-800 text-white hover:bg-blue-900"
+                class="flex items-center gap-1.5 px-5 min-h-12 rounded-lg font-semibold text-base bg-blue-800 text-white hover:bg-blue-900"
                 onclick={handleEndGame}
               >
-                <Flag size={14} /> Final whistle
+                <Flag size={18} /> Final whistle
               </button>
             {/if}
           </div>
 
           <!-- Side countdown timer -->
-          <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
-            <span class="text-xs font-medium text-gray-700 uppercase tracking-wide">Timer</span>
-            <span class={`text-lg font-mono tabular-nums font-bold ${timerExpired ? 'text-red-800' : 'text-gray-800'}`}>
+          <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <span class="text-sm font-medium text-gray-700 uppercase tracking-wide">Timer</span>
+            <span class={`text-3xl font-mono tabular-nums font-bold ${timerExpired ? 'text-red-800' : 'text-gray-800'}`}>
               {formatPlayTime(timerRemainingMs)}
             </span>
             {#if timerDurationMs > 0}
               <button
-                class={`px-2.5 py-0.5 rounded font-semibold text-xs transition-colors ${
+                class={`px-4 min-h-12 rounded-lg font-semibold text-base transition-colors ${
                   timerRunning
                     ? 'bg-red-800 text-white hover:bg-red-900'
                     : timerExpired
@@ -321,7 +321,7 @@
                 {timerRunning ? 'Stop' : timerRemainingMs > 0 ? 'Resume' : 'Done'}
               </button>
               <button
-                class="px-2.5 py-0.5 rounded font-medium text-xs bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
+                class="px-4 min-h-12 rounded-lg font-medium text-base bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
                 onclick={gameStore.resetTimer}
               >
                 Reset
@@ -329,14 +329,14 @@
             {/if}
             {#each [5, 10, 15] as mins (mins)}
               <button
-                class="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors"
+                class="px-4 min-h-12 rounded-lg text-base font-semibold bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors"
                 onclick={() => gameStore.startTimer(mins * 60 * 1000)}
               >
                 {mins}m
               </button>
             {/each}
             {#if timerExpired}
-              <span class="text-xs text-red-800 font-semibold">Time!</span>
+              <span class="text-base text-red-800 font-semibold">Time!</span>
             {/if}
           </div>
         </div>
