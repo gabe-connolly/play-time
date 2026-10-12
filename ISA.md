@@ -94,3 +94,15 @@ Why: these hold across every feature.
 ## Not yet specified
 - Phone-size landscape layout. Play will offer the app to phones unless the device catalog is restricted.
 - Where the privacy policy is hosted. It needs a public URL, and publishing it is Gabriel's call.
+
+## Learnings
+- A locked Android tablet keeps the WebView alive but hidden: `innerText` returns stale layout ("Loading…") while `textContent` and DOM queries are current. Probe hidden WebViews with `textContent`.
+- `vite preview` dies with ENOENT after every rebuild; restart it after each build before browser checks.
+- `@testing-library/svelte` needs `server.deps.inline` in vitest to compile its `.svelte.js` module; without it, component tests fail with `rune_outside_svelte`.
+
+## Remaining Work
+- [ ] Unlock the tablet, then close C6 (touch drag), C10 (keep-awake), C15 (native share export) and C18 (visual), and capture the 1280×800 store screenshots for C20.
+- [ ] Gabriel supplies a contact email and the privacy-policy URL (C20).
+- [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
+- [ ] Gabriel's go-ahead, then upload the AAB to internal testing (C21).
+- [ ] Push branch `play-store` (not pushed; needs Gabriel's OK).
