@@ -2,7 +2,7 @@
 slug: play-time
 project: ~/projects/personal/play-time
 phase: climbing
-progress: 23/24
+progress: 24/24
 principal_stated_goal: "I want to take the app as it as as just a proof of concept, and take it to the next level by building it as an app that can be fully shipped on the Google play store."
 ---
 
@@ -69,7 +69,7 @@ Why: the goal is Google Play, and the store has its own definition of shippable.
 - [x] C18: A debug APK installs and runs on the Fire tablet in landscape, with Gabriel's roster migrated. — device: screencap shows My Team 7 players in landscape; data restored byte-identical after demo capture
 - [x] C19: A signed release AAB builds. The upload keystore lives outside the repo and is never committed. — jarsigner: jar verified; SHA-256 01:6F:46…13:A4; git ls-files has no jks/keystore
 - [x] C20: The Play listing kit exists: privacy policy, data-safety answers, short and full descriptions, 512 icon, feature graphic, tablet screenshots. — store/LISTING.md + icon + feature graphic + 5 tablet screenshots; policy live at justforyou.games/privacy with Play Time section (site e3de5c9, verified uncached + Interceptor); contact hello@justforyou.games
-- [ ] C21: The AAB is uploaded to the internal testing track. This is outward-facing and needs Gabriel's go.
+- [x] C21: The AAB is uploaded to the internal testing track. This is outward-facing and needs Gabriel's go. — Play Console: app games.justforyou.playtime created; release 1 (1.0.0) "Available to internal testers", uploaded AAB sha256 e97ccd5c… matched in-page before upload
 
 ### F0 · Cross-cutting
 Why: these hold across every feature.
@@ -83,6 +83,7 @@ Why: these hold across every feature.
 - [x] A3: No secrets or keystore are committed. (`git ls-files` shows no `.jks`, `.keystore` or `keystore.properties`.)
 
 ## Decisions
+- Package ID changed to games.justforyou.playtime before the first upload, matching the studio's existing games.justforyou.nolooseends; tablet data copied to the new ID and compared byte-for-byte.
 - Field rows compacted (label column, single-line slots) and the substitution panel floats: on the 1280×800 tablet the old layout pushed the goalkeeper row and the sub panel below the fold. Found only on the device.
 - Store screenshots use a demo roster with a fair generated rotation; the principal's data was backed up, swapped out, restored, and compared byte-for-byte.
 - Independent review (fresh context, read-only) found 6 defects, all adopted: ghost player via substitute() with an off-field outgoing player; load error then save overwrote unreadable data (now preserved under a dated key); summary per-period cells floored separately so rows did not add up; import replaced newer team/game copies (now unions players, keeps the further game); pause at 0:00 left the period open; final games mutable at model level. Each has a regression test that failed before the fix (4 model/schema tests) or a browser probe (pending-mode ghost, corrupt-doc preservation, summary row sums).
@@ -106,5 +107,7 @@ Why: these hold across every feature.
 - [x] Gabriel supplied hello@justforyou.games and https://justforyou.games/privacy (live, HTTP 200); wired into the listing and Settings (3dd5757).
 - [x] Play Time section added to the studio policy and deployed (just-for-you-games e3de5c9).
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
-- [ ] Gabriel's go-ahead, then upload the AAB to internal testing (C21).
-- [ ] Push branch `play-store` (not pushed; needs Gabriel's OK).
+- [x] Branch `play-store` pushed to origin.
+- [ ] Add testers to the internal track (track shows Inactive until an email list is attached).
+- [ ] Before production: store listing, app content declarations (LISTING.md has the answers), and the 12-tester 14-day closed test.
+- [ ] Uninstall the old `games.justforyou` debug app from the Fire tablet once Gabriel is happy with the new one.
