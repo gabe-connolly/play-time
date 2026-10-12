@@ -9,7 +9,7 @@
 <body data-sveltekit-preload-data="hover">
   <div style="display: contents">%sveltekit.body%</div>
   <script>
-    if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+    if ('serviceWorker' in navigator && location.hostname !== 'localhost' && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) {
       navigator.serviceWorker.register('/service-worker.js').then(function(reg) {
         reg.addEventListener('updatefound', function() {
           var newWorker = reg.installing;
