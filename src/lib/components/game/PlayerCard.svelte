@@ -51,8 +51,8 @@
   ontouchend={touch.end}
   ontouchcancel={touch.cancel}
 >
-  <div class="flex items-center gap-2">
-    <div>
+  <div class="flex-1 min-w-0 flex items-center gap-2">
+    <div class="flex-1 min-w-0">
       <span class="font-medium">{getDisplayName(player, displayFormat)}</span>
       {#if player.jerseyNumber}
         <span class="text-gray-700 ml-2">#{player.jerseyNumber}</span>
@@ -62,8 +62,8 @@
       {/if}
     </div>
     {#if showPlayTime}
-      <span class="text-xs font-mono tabular-nums px-1.5 py-0.5 rounded {player.isOnField() ? 'bg-green-100 text-green-900' : 'bg-gray-200 text-gray-800'}">
-        {formatPlayTime(currentPlayTime)}
+      <span class="shrink-0 text-xs font-mono tabular-nums px-1.5 py-0.5 rounded {player.isOnField() ? 'bg-green-100 text-green-900' : 'bg-gray-200 text-gray-800'}">
+        {formatPlayTime(currentPlayTime, { padMinutes: true })}
       </span>
     {/if}
   </div>

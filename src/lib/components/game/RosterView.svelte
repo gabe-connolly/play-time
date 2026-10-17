@@ -56,29 +56,35 @@
       {#each players as player (player.id)}
         {@const badges = getAssignmentBadges(player)}
         <div>
-          <PlayerCard
-            {player}
-            {displayFormat}
-            {showPlayTime}
-            {clockMs}
-            draggable={!readOnly && !player.isOut()}
-            sourceType="roster"
-          />
-          <div class="flex flex-wrap items-center gap-1 mt-1 ml-3">
-            {#each badges as badge (badge.label)}
-              <span class={`text-xs px-2 py-0.5 rounded ${badge.color} font-medium`}>{badge.label}</span>
-            {/each}
+          <div class="flex items-center gap-2">
+            <div class="flex-1 min-w-0">
+              <PlayerCard
+                {player}
+                {displayFormat}
+                {showPlayTime}
+                {clockMs}
+                draggable={!readOnly && !player.isOut()}
+                sourceType="roster"
+              />
+            </div>
             {#if onToggleAvailability && !readOnly}
               <button
-                class="ml-auto text-xs px-2 py-1 rounded font-medium {player.isOut()
+                class="shrink-0 text-xs px-2 py-1 rounded font-medium {player.isOut()
                   ? 'bg-green-800 text-white hover:bg-green-900'
-                  : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}"
+                  : 'bg-red-800 text-white hover:bg-red-900'}"
                 onclick={() => onToggleAvailability(player.id, player.isOut())}
               >
                 {player.isOut() ? 'Back in' : 'Mark out'}
               </button>
             {/if}
           </div>
+          {#if badges.length > 0}
+            <div class="flex flex-wrap items-center gap-1 mt-1 ml-3">
+              {#each badges as badge (badge.label)}
+                <span class={`text-xs px-2 py-0.5 rounded ${badge.color} font-medium`}>{badge.label}</span>
+              {/each}
+            </div>
+          {/if}
         </div>
       {/each}
     </div>

@@ -1,13 +1,15 @@
 /**
- * Format milliseconds as M:SS
+ * Format milliseconds as M:SS, or MM:SS when padMinutes is set so a column of times lines up
  * @param {number} ms
+ * @param {{ padMinutes?: boolean }} [options]
  * @returns {string}
  */
-export function formatPlayTime(ms) {
+export function formatPlayTime(ms, { padMinutes = false } = {}) {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  const mm = padMinutes ? minutes.toString().padStart(2, '0') : minutes;
+  return `${mm}:${seconds.toString().padStart(2, '0')}`;
 }
 
 /**

@@ -149,6 +149,16 @@
     gameStore.selectBenchPlayer(null);
   }
 
+  // Backs out of the current bench selection: drops any pending slot it holds, then deselects
+  function handleCancelSelection() {
+    const playerId = selectedBenchPlayerId;
+    if (!playerId) return;
+    if (players.find(p => p.id === playerId)?.pendingPosition != null) {
+      update(copy => copy.clearPendingPosition(playerId));
+    }
+    gameStore.selectBenchPlayer(null);
+  }
+
   function handleMoveToBench() {
     if (!substitutingPlayerId) return;
     const id = substitutingPlayerId;
@@ -375,7 +385,7 @@
 
         </div>
 
-        <div class="w-80 shrink-0 flex flex-col gap-3">
+        <div class="w-120 shrink-0 flex flex-col gap-3">
           <div class="bg-white rounded-lg shadow-lg flex-1 min-h-0 flex flex-col">
             <div class="flex gap-2 p-4 pb-3 shrink-0">
               <button
@@ -410,6 +420,7 @@
                 {clockMs}
                 onSelectPlayer={id => gameStore.selectBenchPlayer(id)}
                 onAssignPosition={handleAssignPosition}
+                onCancelSelection={handleCancelSelection}
                 onDropToBench={handleDropToBench}
               />
             {:else}

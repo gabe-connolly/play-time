@@ -1,10 +1,13 @@
 <script>
+  import { ArrowDown } from 'lucide-svelte';
   import { getDisplayName } from '$lib/utils/displayName.js';
   import { createTouchDrag, readDropPayload } from '$lib/utils/touchDrag.js';
+  import { getDirectionalLabel } from '$lib/utils/slotLabel.js';
 
   let {
     position,
     players,
+    activePlayers = [],
     needed,
     displayFormat = 'full',
     substitutingPlayerId = null,
@@ -21,30 +24,10 @@
     })
   );
 
-  // Determine directional label based on slot position
-  function getDirectionalLabel(index, total) {
-    if (total === 1) return 'Center';
-    if (total === 2) return index === 0 ? 'Left' : 'Right';
-    if (total === 3) {
-      if (index === 0) return 'Left';
-      if (index === 1) return 'Center';
-      return 'Right';
-    }
-    if (total === 4) {
-      if (index === 0) return 'Left';
-      if (index === 1) return 'Center Left';
-      if (index === 2) return 'Center Right';
-      return 'Right';
-    }
-    if (total === 5) {
-      if (index === 0) return 'Left';
-      if (index === 1) return 'Center Left';
-      if (index === 2) return 'Center';
-      if (index === 3) return 'Center Right';
-      return 'Right';
-    }
-    return `Position ${index + 1}`;
-  }
+  // In pending mode, who is on the field in each slot right now
+  const currentSlots = $derived(
+    Array(needed).fill(null).map((_, slotIndex) => activePlayers.find(p => p.positionIndex === slotIndex) || null)
+  );
 
   function handleDragOver(e) {
     e.preventDefault();
@@ -79,6 +62,7 @@
 
   <div class="flex-1 min-w-0 self-stretch flex gap-2 justify-center">
     {#each slots as player, idx (idx)}
+      {@const current = currentSlots[idx]}
       <button
         class={`${position.color} rounded-lg px-2 py-2 text-center min-h-[64px] flex-1 min-w-0 max-w-[180px] touch-none flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
           substitutingPlayerId === player?.id ? 'ring-4 ring-white' : ''
@@ -103,7 +87,19 @@
         {:else}
           <div class="text-xs text-gray-800">{getDirectionalLabel(idx, needed)}</div>
         {/if}
-        {#if player}
+        {#if isPendingMode && current?.id !== player?.id}
+          <div class="text-sm text-gray-800 truncate max-w-full">
+            {#if current}{getDisplayName(current, displayFormat)}{:else}Empty{/if}
+          </div>
+          <ArrowDown class="my-0.5 shrink-0 text-orange-800" size={20} strokeWidth={2.5} aria-label="coming in" />
+          <div class="font-semibold text-sm text-gray-900 truncate max-w-full">
+            {#if player}
+              {getDisplayName(player, displayFormat)}{#if player.jerseyNumber}<span class="font-normal ml-1">#{player.jerseyNumber}</span>{/if}
+            {:else}
+              Empty
+            {/if}
+          </div>
+        {:else if player}
           <div class="font-semibold text-sm text-gray-900 truncate max-w-full">
             {getDisplayName(player, displayFormat)}{#if player.jerseyNumber}<span class="font-normal ml-1">#{player.jerseyNumber}</span>{/if}
           </div>

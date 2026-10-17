@@ -41,6 +41,7 @@
       return {
         position: pos,
         players: sortedPlayers,
+        activePlayers: isPendingMode ? players.filter(p => p.isOnField() && p.position === pos.name) : [],
         needed
       };
     }).reverse() // Reverse to show offensive (Forward) at top, defensive (Goalkeeper) at bottom
@@ -112,6 +113,7 @@
       <PositionGroup
         position={group.position}
         players={group.players}
+        activePlayers={group.activePlayers}
         needed={group.needed}
         {displayFormat}
         {substitutingPlayerId}
