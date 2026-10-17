@@ -169,7 +169,6 @@
     gameStore.selectBenchPlayer(null);
   }
 
-  // Backs out of the current bench selection: drops any pending slot it holds, then deselects
   // Arming a stat clears any half-finished substitution and shows the live lineup,
   // because stats are credited to the players actually on the field.
   function handleArmStat(statId) {
@@ -183,6 +182,7 @@
     update(copy => copy.undoLastStat());
   }
 
+  // Backs out of the current bench selection: drops any pending slot it holds, then deselects.
   function handleCancelSelection() {
     const playerId = selectedBenchPlayerId;
     if (!playerId) return;
