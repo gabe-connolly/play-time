@@ -39,3 +39,8 @@ coverage
 
 # OS files
 Thumbs.db
+
+# Android signing secrets
+*.jks
+*.keystore
+keystore.properties

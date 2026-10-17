@@ -14,8 +14,8 @@
         <button
           class={`px-4 py-2 rounded-lg font-medium ${
             formation?.name === f.name
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? 'bg-blue-800 text-white'
+              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
           }`}
           onclick={() => onSelect(f)}
         >

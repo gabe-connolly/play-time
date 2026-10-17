@@ -1,13 +1,13 @@
 {
-  "name": "Field Coach",
-  "short_name": "FieldCoach",
+  "name": "Play Time",
+  "short_name": "Play Time",
   "description": "Manage your team's field positions and substitutions",
   "id": "/",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
-  "orientation": "portrait",
+  "orientation": "landscape",
   "icons": [
     {
       "src": "/icon-192.png",

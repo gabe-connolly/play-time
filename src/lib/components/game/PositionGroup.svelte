@@ -1,9 +1,13 @@
 <script>
+  import { ArrowDown } from 'lucide-svelte';
   import { getDisplayName } from '$lib/utils/displayName.js';
+  import { createTouchDrag, readDropPayload } from '$lib/utils/touchDrag.js';
+  import { getDirectionalLabel } from '$lib/utils/slotLabel.js';
 
   let {
     position,
     players,
+    activePlayers = [],
     needed,
     displayFormat = 'full',
     substitutingPlayerId = null,
@@ -20,158 +24,87 @@
     })
   );
 
-  // Determine directional label based on slot position
-  function getDirectionalLabel(index, total) {
-    if (total === 1) return 'Center';
-    if (total === 2) return index === 0 ? 'Left' : 'Right';
-    if (total === 3) {
-      if (index === 0) return 'Left';
-      if (index === 1) return 'Center';
-      return 'Right';
-    }
-    if (total === 4) {
-      if (index === 0) return 'Left';
-      if (index === 1) return 'Center Left';
-      if (index === 2) return 'Center Right';
-      return 'Right';
-    }
-    if (total === 5) {
-      if (index === 0) return 'Left';
-      if (index === 1) return 'Center Left';
-      if (index === 2) return 'Center';
-      if (index === 3) return 'Center Right';
-      return 'Right';
-    }
-    return `Position ${index + 1}`;
-  }
+  // In pending mode, who is on the field in each slot right now
+  const currentSlots = $derived(
+    Array(needed).fill(null).map((_, slotIndex) => activePlayers.find(p => p.positionIndex === slotIndex) || null)
+  );
 
   function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   }
 
-  function handleDrop(e, slotIndex) {
-    e.preventDefault();
-    const data = JSON.parse(e.dataTransfer.getData('application/json'));
-    
-    if (onDropPlayer) {
-      const currentPlayer = slots[slotIndex];
-      onDropPlayer(data.playerId, position.name, slotIndex, currentPlayer?.id, data.sourcePosition, data.sourceSlotIndex);
-    }
+  function dropOnSlot(payload, slotIndex) {
+    if (!payload || !onDropPlayer) return;
+    onDropPlayer(payload.playerId, position.name, slotIndex, slots[slotIndex]?.id);
   }
 
   function handleDragStart(e, player, slotIndex) {
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify({
-      playerId: player.id,
-      sourceType: 'field',
-      sourcePosition: position.name,
-      sourceSlotIndex: slotIndex
-    }));
+    e.dataTransfer.setData('application/json', JSON.stringify(slotPayload(player, slotIndex)));
   }
 
-  // Touch event handlers for mobile support
-  let touchStartData = null;
-
-  function handleTouchStart(e, player, slotIndex) {
-    if (!player) return;
-    e.preventDefault();
-    touchStartData = {
-      playerId: player.id,
-      sourceType: 'field',
-      sourcePosition: position.name,
-      sourceSlotIndex: slotIndex,
-      startX: e.touches[0].clientX,
-      startY: e.touches[0].clientY
-    };
-    // Add visual feedback
-    e.currentTarget.style.opacity = '0.5';
+  function slotPayload(player, slotIndex) {
+    return { playerId: player.id, sourceType: 'field', sourcePosition: position.name, sourceSlotIndex: slotIndex };
   }
 
-  function handleTouchMove(e) {
-    if (!touchStartData) return;
-    e.preventDefault();
-  }
-
-  function handleTouchEnd(e, slotIndex) {
-    if (!touchStartData) return;
-    e.preventDefault();
-    
-    // Reset visual feedback on source
-    const sourceElements = document.querySelectorAll('[style*="opacity: 0.5"]');
-    sourceElements.forEach(el => el.style.opacity = '');
-    
-    // Find the element at the touch end position
-    const touch = e.changedTouches[0];
-    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-    
-    if (targetElement) {
-      // Find the closest button with data-slot attribute
-      const dropTarget = targetElement.closest('[data-slot-index]');
-      if (dropTarget && onDropPlayer) {
-        const targetSlotIndex = parseInt(dropTarget.getAttribute('data-slot-index'));
-        const targetPosition = dropTarget.getAttribute('data-position');
-        
-        if (targetPosition === position.name) {
-          const currentPlayer = slots[targetSlotIndex];
-          onDropPlayer(
-            touchStartData.playerId,
-            position.name,
-            targetSlotIndex,
-            currentPlayer?.id,
-            touchStartData.sourcePosition,
-            touchStartData.sourceSlotIndex
-          );
-        }
-      }
-    }
-    
-    touchStartData = null;
-  }
+  // One touch tracker per slot, rebuilt when the slot count changes.
+  const touches = $derived(
+    slots.map((_, idx) => createTouchDrag(() => (slots[idx] ? slotPayload(slots[idx], idx) : null)))
+  );
 </script>
 
-<div class="bg-white/10 rounded-lg p-3">
-  <div class="flex items-center justify-between mb-2">
-    <h3 class="text-white font-semibold">{position.name}</h3>
-    <span class="text-white text-sm">
-      {players.length}/{needed}
-    </span>
+<div class="bg-green-800 rounded-lg px-3 py-2 flex-1 flex items-center gap-3">
+  <div class="w-24 shrink-0">
+    <h3 class="text-white font-semibold leading-tight">{position.name}</h3>
+    <span class="text-white text-sm">{players.length}/{needed}</span>
   </div>
 
-  <div class="flex flex-wrap gap-2 justify-center">
+  <div class="flex-1 min-w-0 self-stretch flex gap-2 justify-center">
     {#each slots as player, idx (idx)}
+      {@const current = currentSlots[idx]}
       <button
-        class={`${position.color} rounded-lg p-3 text-center min-h-[60px] w-[180px] flex flex-col items-center justify-center hover:opacity-80 transition-opacity ${
-          substitutingPlayerId === player?.id ? 'ring-2 ring-red-500' : ''
-        } ${!player ? 'border-2 border-dashed border-white/30' : ''}`}
+        class={`${position.color} rounded-lg px-2 py-2 text-center min-h-[64px] flex-1 min-w-0 max-w-[180px] touch-none flex flex-col items-center justify-center hover:ring-2 hover:ring-white ${
+          substitutingPlayerId === player?.id ? 'ring-4 ring-white' : ''
+        } ${!player ? 'border-2 border-dashed border-white/70' : ''}`}
         onclick={() => player && onPlayerClick?.(player.id)}
-        disabled={!player}
+        aria-disabled={!player}
         ondragover={handleDragOver}
-        ondrop={(e) => handleDrop(e, idx)}
+        ondrop={(e) => { e.preventDefault(); dropOnSlot(readDropPayload(e), idx); }}
+        onplayertouchdrop={(e) => dropOnSlot(e.detail, idx)}
         draggable={!!player}
         ondragstart={(e) => player && handleDragStart(e, player, idx)}
-        ontouchstart={(e) => handleTouchStart(e, player, idx)}
-        ontouchmove={handleTouchMove}
-        ontouchend={(e) => handleTouchEnd(e, idx)}
+        ontouchstart={touches[idx].start}
+        ontouchmove={touches[idx].move}
+        ontouchend={touches[idx].end}
+        ontouchcancel={touches[idx].cancel}
+        data-drop-zone
         data-slot-index={idx}
         data-position={position.name}
       >
-        {#if player}
-          <div class="text-xs text-gray-500 mb-1 opacity-70">{getDirectionalLabel(idx, needed)}</div>
-          <div class="font-semibold text-sm">
-            {getDisplayName(player, displayFormat)}
-          </div>
-          {#if player.jerseyNumber}
-            <div class="text-xs mt-1">#{player.jerseyNumber}</div>
-          {/if}
-          {#if substitutingPlayerId === player.id}
-            <div class="text-xs mt-1 text-red-700 font-bold">
-              Subbing out
-            </div>
-          {/if}
+        {#if player && substitutingPlayerId === player.id}
+          <div class="text-xs px-1.5 rounded bg-red-900 text-white font-bold">Subbing out</div>
         {:else}
-          <div class="text-xs text-gray-400 mb-1">{getDirectionalLabel(idx, needed)}</div>
-          <div class="text-sm text-gray-600">Empty</div>
+          <div class="text-xs text-gray-800">{getDirectionalLabel(idx, needed)}</div>
+        {/if}
+        {#if isPendingMode && current?.id !== player?.id}
+          <div class="text-sm text-gray-800 truncate max-w-full">
+            {#if current}{getDisplayName(current, displayFormat)}{:else}Empty{/if}
+          </div>
+          <ArrowDown class="my-0.5 shrink-0 text-orange-800" size={20} strokeWidth={2.5} aria-label="coming in" />
+          <div class="font-semibold text-sm text-gray-900 truncate max-w-full">
+            {#if player}
+              {getDisplayName(player, displayFormat)}{#if player.jerseyNumber}<span class="font-normal ml-1">#{player.jerseyNumber}</span>{/if}
+            {:else}
+              Empty
+            {/if}
+          </div>
+        {:else if player}
+          <div class="font-semibold text-sm text-gray-900 truncate max-w-full">
+            {getDisplayName(player, displayFormat)}{#if player.jerseyNumber}<span class="font-normal ml-1">#{player.jerseyNumber}</span>{/if}
+          </div>
+        {:else}
+          <div class="text-sm text-gray-800">Empty</div>
         {/if}
       </button>
     {/each}

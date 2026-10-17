@@ -13,28 +13,28 @@
   const canComplete = $derived(selectedBenchPlayerId !== null);
 </script>
 
-<div class="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+<div class="fixed bottom-4 left-4 z-40 w-[min(36rem,calc(100vw-23rem))] bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 shadow-2xl" role="dialog" aria-label="Substitution">
   <h3 class="font-bold text-lg mb-2">Select Substitute</h3>
-  <p class="text-sm text-gray-600 mb-3">
+  <p class="text-sm text-gray-700 mb-3">
     Subbing out: <strong>{getDisplayName(substitutingPlayer, displayFormat)}</strong>
   </p>
   <div class="flex gap-2 flex-wrap">
     <button
-      class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      class="px-4 py-2 bg-red-800 text-white rounded hover:bg-red-900"
       onclick={onMoveToBench}
     >
       Move to Bench
     </button>
     {#if canComplete}
       <button
-        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        class="px-4 py-2 bg-green-800 text-white rounded hover:bg-green-900"
         onclick={onCompleteSubstitution}
       >
         Complete Substitution
       </button>
     {/if}
     <button
-      class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+      class="px-4 py-2 bg-gray-300 text-gray-900 rounded hover:bg-gray-200"
       onclick={onCancel}
     >
       Cancel
