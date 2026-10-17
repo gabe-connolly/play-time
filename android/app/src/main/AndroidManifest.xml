@@ -30,6 +30,13 @@
         </provider>
     </application>
 
+    <!-- Tablets only: the sideline layout needs a large landscape screen, and Google Play hides the app from small and normal (phone) screens -->
+    <supports-screens
+        android:smallScreens="false"
+        android:normalScreens="false"
+        android:largeScreens="true"
+        android:xlargeScreens="true" />
+
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
