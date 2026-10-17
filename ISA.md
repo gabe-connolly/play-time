@@ -2,8 +2,11 @@
 slug: play-time
 project: ~/projects/personal/play-time
 phase: complete
-progress: 24/24
+progress: 32/32
 principal_stated_goal: "I want to take the app as it as as just a proof of concept, and take it to the next level by building it as an app that can be fully shipped on the Google play store."
+iteration: 2
+resumed_at: 2026-10-17T19:01:42.273Z
+resumed_from_phase: complete
 ---
 
 # Play Time: youth soccer playtime manager for Google Play
@@ -71,6 +74,17 @@ Why: the goal is Google Play, and the store has its own definition of shippable.
 - [x] C20: The Play listing kit exists: privacy policy, data-safety answers, short and full descriptions, 512 icon, feature graphic, tablet screenshots. — store/LISTING.md + icon + feature graphic + 5 tablet screenshots; policy live at justforyou.games/privacy with Play Time section (site e3de5c9, verified uncached + Interceptor); contact hello@justforyou.games
 - [x] C21: The AAB is uploaded to the internal testing track. This is outward-facing and needs Gabriel's go. — Play Console: app games.justforyou.playtime created; release 1 (1.0.0) "Available to internal testers", uploaded AAB sha256 e97ccd5c… matched in-page before upload
 
+### F7 · Stat tracking
+Why: Gabriel (2026-10-17): "add a 'settings' toggle in the top right - use a gear icon… stat tracking. If this is turned on… an additional row at the bottom for 'Stat tracker'… a button to track any enabled stat." Stats are credited to a player (tap stat, then tap a player) and shown on the game summary.
+- [x] C25: The game header has a gear button at the top right that opens Settings, and Settings' back link returns to that game. — Interceptor: gear → #/settings?game=<id>, back link "Game" → #/games/<id>; from home it reads "Teams" → #/
+- [x] C26: Settings has a Stat tracking switch (off by default) and, when on, a checklist of the 15 stats (Goals … Yellow / red cards). Choices survive a reload. — Interceptor: one click turns the switch on, 15 stats listed with Goals and Assists pre-checked; schema.test keeps a stored choice on load and defaults older docs to off
+- [x] C27: With tracking on and at least one stat enabled, the game screen shows a "Stat tracker" row at the bottom of the field with one button per enabled stat (Yellow / red cards gives a Yellow and a Red button). With tracking off, the row is absent. — Interceptor: Goal, Assist, Shot, Yellow card and Red card buttons in a row under Goalkeeper
+- [x] C28: Tapping a stat arms it. Tapping an on-field player then credits that stat to them at the current game clock. Tapping the armed stat again disarms it, and while armed, field taps never start a substitution. — Game.test recordStat; Interceptor: Goal armed → tap Matthew → "Goal · Matthew Bissonnette · 2:13", no sub panel; tapping it again disarms and the field tap opens subs as before
+- [x] C29: The most recent stat can be undone from the tracker row. — Game.test undo; Interceptor: Undo clears the last line
+- [x] C30: Stat events live in the game document and round-trip through toJSON/fromJSON and export/import. — Game.test toJSON/fromJSON; schema.test export/import keeps getStatTotals
+- [x] C31: The game summary shows a Stats table (each player × each recorded stat, plus team totals) only when the game has stat events. — Interceptor: summary shows Stats with Matthew 1 and Team 1; with no events there's no Stats heading
+- [x] A4: Recording or undoing a stat never changes playtime or the lineup, and a final game rejects new stat events. — Game.test: participants unchanged, playtime 10:00 intact, final game rejects record and undo
+
 ### F0 · Cross-cutting
 Why: these hold across every feature.
 - [x] C22: Every text node on the new screens meets AAA contrast (in-browser audit, 0 failures). — in-browser audit 0 failures: home 6, team 30, new-game 41, settings 16, summary 55, game states 66/68/85; probe at 2.31 caught
@@ -94,14 +108,20 @@ Why: these hold across every feature.
 - Clock restore: a game clock found running on restore keeps running, capped at the current period's end. The plan said "restore paused", but the real game continued while the app was closed, and the cap alone is what bounds the damage.
 - Hash router (`kit.router.type = 'hash'`), so routing works from Capacitor's bundled files and from any static host without server rewrites.
 
+- Stat tracking: "Yellow / red cards" is one setting that gives two buttons, since a card's colour is the whole point. Stats only credit players on the field, and arming a stat drops any half-done sub and shows the Active lineup. The tracker is hidden on final games.
+
+- Privacy policy hosting is settled: it lives at https://justforyou.games/privacy (see C20).
+- Phone-size landscape layout is moved to Remaining Work as an open decision, since it gates production rather than any built feature.
+- D-auto-2026-10-17T19:01:42.273Z: Auto-resumed from complete to learn at 2026-10-17T19:01:42.273Z — iteration 2
+
 ## Not yet specified
-- Phone-size landscape layout. Play will offer the app to phones unless the device catalog is restricted.
-- Where the privacy policy is hosted. It needs a public URL, and publishing it is Gabriel's call.
 
 ## Learnings
 - A locked Android tablet keeps the WebView alive but hidden: `innerText` returns stale layout ("Loading…") while `textContent` and DOM queries are current. Probe hidden WebViews with `textContent`.
 - `vite preview` dies with ENOENT after every rebuild; restart it after each build before browser checks.
 - `@testing-library/svelte` needs `server.deps.inline` in vitest to compile its `.svelte.js` module; without it, component tests fail with `rune_outside_svelte`.
+
+- Two browser tabs on the same game fight over storage: each tab's clock tick saves its whole in-memory doc, so a settings change made in one tab is overwritten by the other. It doesn't happen on the tablet (one instance), but it can fool a browser check. Test with only one app tab open.
 
 ## Remaining Work
 - [x] Gabriel supplied hello@justforyou.games and https://justforyou.games/privacy (live, HTTP 200); wired into the listing and Settings (3dd5757).
@@ -109,5 +129,6 @@ Why: these hold across every feature.
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
 - [x] Branch `play-store` pushed to origin.
 - [x] Internal track Active with the "Play Time internal" list (personal Gmail). Opt-in: https://play.google.com/apps/internaltest/4700861366731156800
+- [ ] Before production: Gabriel decides between a phone-size landscape layout and limiting the Play device catalog to tablets, because Play will otherwise offer the app to phones.
 - [ ] Before production: store listing, app content declarations (LISTING.md has the answers), and the 12-tester 14-day closed test.
 - [ ] Uninstall the old `games.justforyou` debug app from the Fire tablet once Gabriel is happy with the new one.

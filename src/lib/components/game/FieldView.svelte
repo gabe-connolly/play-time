@@ -15,7 +15,8 @@
     onViewPending = null,
     onPrepareSubs = null,
     onCommitSubs = null,
-    onDiscardSubs = null
+    onDiscardSubs = null,
+    footer = null
   } = $props();
 
   const fieldPlayers = $derived(
@@ -123,4 +124,5 @@
       />
     {/each}
   </div>
+  {@render footer?.()}
 </div>

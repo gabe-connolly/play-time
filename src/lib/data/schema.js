@@ -5,13 +5,19 @@
  *   { schemaVersion, teams: TeamJSON[], games: GameJSON[], settings }
  */
 
+import { DEFAULT_STAT_SETTING_IDS } from '$lib/config/stats.js';
+
 export const SCHEMA_VERSION = 2;
 
 /** localStorage key used by the single-team v1 app. */
 export const LEGACY_TEAM_KEY = 'field_coach_team';
 export const LEGACY_GAME_STATE_KEY = 'field_coach_game_state';
 
-export const DEFAULT_SETTINGS = { displayFormat: 'full', timer: null };
+export const DEFAULT_SETTINGS = {
+  displayFormat: 'full',
+  timer: null,
+  statTracking: { enabled: false, settingIds: [...DEFAULT_STAT_SETTING_IDS] }
+};
 
 export function emptyDoc() {
   return { schemaVersion: SCHEMA_VERSION, teams: [], games: [], settings: { ...DEFAULT_SETTINGS } };

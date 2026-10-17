@@ -8,8 +8,31 @@
   import PageHeader from '$lib/components/shared/PageHeader.svelte';
   import * as appStore from '$lib/stores/appStore.svelte.js';
   import { href, go } from '$lib/utils/nav.js';
+  import { page } from '$app/state';
+  import { STAT_SETTINGS } from '$lib/config/stats.js';
 
   const settings = $derived(appStore.getSettings());
+  const statTracking = $derived(settings.statTracking);
+
+  // Opened from a game, the back link returns to that game; otherwise to the team list.
+  // Under the hash router the query string lives inside the hash (#/settings?game=…).
+  const fromGame = $derived(new URLSearchParams(page.url.hash.split('?')[1] ?? '').get('game'));
+  const back = $derived(
+    fromGame && appStore.getGame(fromGame)
+      ? { href: href(`/games/${fromGame}`), label: 'Game' }
+      : { href: href('/'), label: 'Teams' }
+  );
+
+  function updateStatTracking(updates) {
+    appStore.updateSettings({ statTracking: { ...statTracking, ...updates } });
+  }
+
+  function toggleStat(id) {
+    const ids = new Set(statTracking.settingIds);
+    if (ids.has(id)) ids.delete(id);
+    else ids.add(id);
+    updateStatTracking({ settingIds: STAT_SETTINGS.map(s => s.id).filter(sid => ids.has(sid)) });
+  }
 
   let message = $state(null); // { kind: 'ok' | 'error', text }
   let version = $state('');
@@ -81,7 +104,7 @@
   }
 </script>
 
-<PageHeader title="Settings" backHref={href('/')} backLabel="Teams" />
+<PageHeader title="Settings" backHref={back.href} backLabel={back.label} />
 
 <main class="min-h-screen bg-gray-100 p-4">
   <div class="max-w-3xl mx-auto space-y-4">
@@ -99,6 +122,46 @@
           </button>
         {/each}
       </div>
+    </section>
+
+    <section class="bg-white rounded-lg shadow p-5">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">Stat tracking</h2>
+          <p class="text-gray-700">Adds a stat tracker to the game screen. Tap a stat, then the player who made it.</p>
+        </div>
+        <button
+          role="switch"
+          aria-checked={statTracking.enabled}
+          aria-label="Stat tracking"
+          class="relative shrink-0 w-14 h-8 rounded-full transition-colors {statTracking.enabled ? 'bg-green-800' : 'bg-gray-400'}"
+          onclick={() => updateStatTracking({ enabled: !statTracking.enabled })}
+        >
+          <span
+            class="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow transition-transform {statTracking.enabled ? 'translate-x-6' : ''}"
+          ></span>
+        </button>
+      </div>
+
+      {#if statTracking.enabled}
+        <h3 class="font-semibold text-gray-900 mt-4 mb-2">Stats to track</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {#each STAT_SETTINGS as stat (stat.id)}
+            <label class="flex items-center gap-3 px-3 min-h-12 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer">
+              <input
+                type="checkbox"
+                class="w-5 h-5 accent-green-800"
+                checked={statTracking.settingIds.includes(stat.id)}
+                onchange={() => toggleStat(stat.id)}
+              />
+              <span class="text-gray-900">{stat.label}</span>
+            </label>
+          {/each}
+        </div>
+        {#if statTracking.settingIds.length === 0}
+          <p class="text-sm text-gray-800 mt-2">Pick at least one stat to show the tracker.</p>
+        {/if}
+      {/if}
     </section>
 
     <section class="bg-white rounded-lg shadow p-5">

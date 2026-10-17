@@ -18,7 +18,8 @@ export class Game {
     status = 'live',
     config,
     clock,
-    participants = []
+    participants = [],
+    statEvents = []
   }) {
     this.id = id;
     this.teamId = teamId;
@@ -31,6 +32,8 @@ export class Game {
     this.participants = participants.map(p =>
       p instanceof Participant ? p : Participant.fromJSON(p)
     );
+    // { id, statId, playerId, clockMs, periodIndex }, in the order they were recorded
+    this.statEvents = statEvents.map(e => ({ ...e }));
   }
 
   /**
@@ -218,6 +221,42 @@ export class Game {
     return status;
   }
 
+  // --- Stats ---
+
+  /**
+   * Credit a stat to a player who is on the field, stamped with the game clock.
+   * @returns {boolean} false when the game is final or the player is not on the field
+   */
+  recordStat({ id, statId, playerId }, now) {
+    if (this.isFinal || !this.getParticipant(playerId)?.isOnField()) return false;
+    this.statEvents = [
+      ...this.statEvents,
+      { id, statId, playerId, clockMs: this.clockMs(now), periodIndex: this.clock.periodIndex }
+    ];
+    return true;
+  }
+
+  /** @returns {boolean} false when there is nothing to undo or the game is final */
+  undoLastStat() {
+    if (this.isFinal || this.statEvents.length === 0) return false;
+    this.statEvents = this.statEvents.slice(0, -1);
+    return true;
+  }
+
+  get lastStatEvent() {
+    return this.statEvents.at(-1) ?? null;
+  }
+
+  /** Stat counts per player: { [playerId]: { [statId]: count } } */
+  getStatTotals() {
+    const totals = {};
+    for (const e of this.statEvents) {
+      const row = (totals[e.playerId] ??= {});
+      row[e.statId] = (row[e.statId] ?? 0) + 1;
+    }
+    return totals;
+  }
+
   // --- Summary ---
 
   /**
@@ -245,7 +284,8 @@ export class Game {
       status: this.status,
       config: { ...this.config, positionCounts: { ...this.config.positionCounts } },
       clock: this.clock.toJSON(),
-      participants: this.participants.map(p => p.toJSON())
+      participants: this.participants.map(p => p.toJSON()),
+      statEvents: this.statEvents.map(e => ({ ...e }))
     };
   }
 

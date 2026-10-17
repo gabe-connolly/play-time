@@ -66,6 +66,15 @@ describe('schema', () => {
     expect(() => parseImport(JSON.stringify({ schemaVersion: 99, teams: [], games: [] }), 0)).toThrow('newer');
   });
 
+  it('defaults stat tracking off, and keeps a stored stat tracking choice on load', () => {
+    expect(emptyDoc().settings.statTracking).toEqual({ enabled: false, settingIds: ['goals', 'assists'] });
+    const stored = { enabled: true, settingIds: ['shots', 'cards'] };
+    const loaded = normalizeDoc({ ...emptyDoc(), settings: { displayFormat: 'full', statTracking: stored } }, 0);
+    expect(loaded.settings.statTracking).toEqual(stored);
+    const older = normalizeDoc({ ...emptyDoc(), settings: { displayFormat: 'nickname' } }, 0);
+    expect(older.settings.statTracking.enabled).toBe(false);
+  });
+
   it('round-trips teams, players and games through export and import', () => {
     const team = new Team({ id: 't', name: 'Tigers', createdAt: 5, players: [{ id: 'a', firstName: 'A', lastName: 'B', jerseyNumber: '9' }] });
     const game = Game.create({
@@ -77,6 +86,7 @@ describe('schema', () => {
     });
     game.assignToPosition('a', 'Goalkeeper', 0, 10);
     game.startClock(10);
+    game.recordStat({ id: 's1', statId: 'goals', playerId: 'a' }, 10 + 30000);
     game.end(10 + 60000);
 
     const doc = { ...emptyDoc(), teams: [team.toJSON()], games: [game.toJSON()] };
@@ -84,6 +94,7 @@ describe('schema', () => {
     expect(back.teams).toEqual(doc.teams);
     expect(back.games).toEqual(doc.games);
     expect(Game.fromJSON(back.games[0]).getPlaytimeSummary(0)[0].totalMs).toBe(60000);
+    expect(Game.fromJSON(back.games[0]).getStatTotals()).toEqual({ a: { goals: 1 } });
   });
 
   it('merges imports by id without dropping existing records', () => {

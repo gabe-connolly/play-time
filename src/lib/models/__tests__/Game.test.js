@@ -153,4 +153,54 @@ describe('Game', () => {
     game.addParticipant(makeTeam().getPlayer('d'));
     expect(JSON.stringify(game.toJSON())).toBe(before);
   });
+
+  describe('stats', () => {
+    beforeEach(() => {
+      game.assignToPosition('a', 'Goalkeeper', 0, 0);
+      game.startClock(0);
+    });
+
+    it('credits a stat to an on-field player at the current game clock', () => {
+      expect(game.recordStat({ id: 's1', statId: 'goals', playerId: 'a' }, 3 * MIN)).toBe(true);
+      expect(game.statEvents).toEqual([{ id: 's1', statId: 'goals', playerId: 'a', clockMs: 3 * MIN, periodIndex: 0 }]);
+      expect(game.getStatTotals()).toEqual({ a: { goals: 1 } });
+    });
+
+    it('refuses stats for players who are not on the field', () => {
+      expect(game.recordStat({ id: 's1', statId: 'goals', playerId: 'b' }, MIN)).toBe(false);
+      expect(game.recordStat({ id: 's2', statId: 'goals', playerId: 'zz' }, MIN)).toBe(false);
+      expect(game.statEvents).toEqual([]);
+    });
+
+    it('counts repeated stats and undoes only the most recent one', () => {
+      game.recordStat({ id: 's1', statId: 'shots', playerId: 'a' }, MIN);
+      game.recordStat({ id: 's2', statId: 'shots', playerId: 'a' }, 2 * MIN);
+      game.recordStat({ id: 's3', statId: 'goals', playerId: 'a' }, 3 * MIN);
+      expect(game.undoLastStat()).toBe(true);
+      expect(game.lastStatEvent.id).toBe('s2');
+      expect(game.getStatTotals()).toEqual({ a: { shots: 2 } });
+    });
+
+    it('never changes playtime or the lineup', () => {
+      const lineup = JSON.stringify(game.participants.map(p => p.toJSON()));
+      game.recordStat({ id: 's1', statId: 'goals', playerId: 'a' }, 5 * MIN);
+      game.undoLastStat();
+      game.recordStat({ id: 's2', statId: 'tackles', playerId: 'a' }, 6 * MIN);
+      expect(JSON.stringify(game.participants.map(p => p.toJSON()))).toBe(lineup);
+      expect(game.getParticipant('a').getPlayTimeMs(game.clockMs(10 * MIN))).toBe(10 * MIN);
+    });
+
+    it('round-trips through toJSON / fromJSON', () => {
+      game.recordStat({ id: 's1', statId: 'redCards', playerId: 'a' }, MIN);
+      expect(Game.fromJSON(game.toJSON()).statEvents).toEqual(game.statEvents);
+    });
+
+    it('rejects new stats and undo once the game is final', () => {
+      game.recordStat({ id: 's1', statId: 'goals', playerId: 'a' }, MIN);
+      game.end(2 * MIN);
+      expect(game.recordStat({ id: 's2', statId: 'goals', playerId: 'a' }, 2 * MIN)).toBe(false);
+      expect(game.undoLastStat()).toBe(false);
+      expect(game.statEvents.length).toBe(1);
+    });
+  });
 });

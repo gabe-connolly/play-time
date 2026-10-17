@@ -1,12 +1,16 @@
 <script>
   import { onMount } from 'svelte';
   import { page } from '$app/state';
-  import { ChevronLeft, Flag } from 'lucide-svelte';
+  import { ChevronLeft, Flag, Settings } from 'lucide-svelte';
   import { KeepAwake } from '@capacitor-community/keep-awake';
   import FieldView from '$lib/components/game/FieldView.svelte';
   import BenchView from '$lib/components/game/BenchView.svelte';
   import RosterView from '$lib/components/game/RosterView.svelte';
   import SubstitutionPanel from '$lib/components/game/SubstitutionPanel.svelte';
+  import StatTracker from '$lib/components/game/StatTracker.svelte';
+  import { getStat, statsForSettings } from '$lib/config/stats.js';
+  import { getDisplayName } from '$lib/utils/displayName.js';
+  import { generateId } from '$lib/utils/idGenerator.js';
   import { SOCCER, periodLabel } from '$lib/config/sports.js';
   import { formatPlayTime, formatCountdown } from '$lib/utils/formatTime.js';
   import { href, go } from '$lib/utils/nav.js';
@@ -37,6 +41,16 @@
   );
 
   const displayFormat = $derived(appStore.getSettings().displayFormat);
+  const statTracking = $derived(appStore.getSettings().statTracking);
+  const trackedStats = $derived(statTracking.enabled ? statsForSettings(statTracking.settingIds) : []);
+  // The stat waiting for a player tap; transient, so it never outlives this screen.
+  let armedStatId = $state(null);
+  const lastStatText = $derived.by(() => {
+    const event = game?.lastStatEvent;
+    if (!event) return null;
+    const player = game.getParticipant(event.playerId);
+    return `${getStat(event.statId)?.label ?? event.statId} · ${player ? getDisplayName(player, displayFormat) : 'Unknown'} · ${formatPlayTime(event.clockMs)}`;
+  });
   const substitutingPlayerId = $derived(gameStore.getSubstitutingPlayer());
   const selectedBenchPlayerId = $derived(gameStore.getSelectedBenchPlayer());
   const fieldMode = $derived(gameStore.getFieldMode());
@@ -112,6 +126,12 @@
   // --- Lineup ---
 
   function handleFieldPlayerClick(playerId) {
+    if (armedStatId) {
+      const statId = armedStatId;
+      update((copy, at) => copy.recordStat({ id: generateId(), statId, playerId }, at));
+      armedStatId = null;
+      return;
+    }
     if (substitutingPlayerId === playerId) gameStore.cancelSubstitution();
     else gameStore.startSubstitution(playerId);
   }
@@ -150,6 +170,19 @@
   }
 
   // Backs out of the current bench selection: drops any pending slot it holds, then deselects
+  // Arming a stat clears any half-finished substitution and shows the live lineup,
+  // because stats are credited to the players actually on the field.
+  function handleArmStat(statId) {
+    armedStatId = statId;
+    if (!statId) return;
+    gameStore.cancelSubstitution();
+    gameStore.setFieldMode('active');
+  }
+
+  function handleUndoStat() {
+    update(copy => copy.undoLastStat());
+  }
+
   function handleCancelSelection() {
     const playerId = selectedBenchPlayerId;
     if (!playerId) return;
@@ -350,6 +383,15 @@
             {/if}
           </div>
         </div>
+
+        <a
+          href={href(`/settings?game=${gameId}`)}
+          class="flex items-center justify-center w-12 min-h-12 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 shrink-0"
+          aria-label="Settings"
+          title="Settings"
+        >
+          <Settings size={24} />
+        </a>
       </div>
 
       <!-- Main two-column layout -->
@@ -370,7 +412,19 @@
             onPrepareSubs={handlePrepareSubs}
             onCommitSubs={handleCommitSubstitution}
             onDiscardSubs={handleCancelPending}
-          />
+          >
+            {#snippet footer()}
+              {#if trackedStats.length > 0 && !game.isFinal}
+                <StatTracker
+                  stats={trackedStats}
+                  {armedStatId}
+                  lastEventText={lastStatText}
+                  onArm={handleArmStat}
+                  onUndo={handleUndoStat}
+                />
+              {/if}
+            {/snippet}
+          </FieldView>
 
           {#if isSubstituting && substitutingPlayer}
             <SubstitutionPanel

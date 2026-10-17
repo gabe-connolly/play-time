@@ -6,6 +6,7 @@
   import { formatPlayTime, formatGameDate } from '$lib/utils/formatTime.js';
   import { getDisplayName } from '$lib/utils/displayName.js';
   import { href } from '$lib/utils/nav.js';
+  import { ALL_STATS } from '$lib/config/stats.js';
 
   const gameId = page.params.gameId;
   const game = $derived(appStore.getGame(gameId));
@@ -29,6 +30,12 @@
   const periods = $derived(game ? game.clock.periods : []);
   const gameMs = $derived(game ? game.clockMs(now) : 0);
   const maxMs = $derived(Math.max(1, ...rows.map(r => r.totalMs)));
+
+  // Stats table: only the stats this game recorded, only the players who recorded one.
+  const statTotals = $derived(game ? game.getStatTotals() : {});
+  const statColumns = $derived(ALL_STATS.filter(stat => Object.values(statTotals).some(row => row[stat.id])));
+  const statRows = $derived(rows.filter(r => statTotals[r.id]));
+  const teamStatTotal = statId => Object.values(statTotals).reduce((sum, row) => sum + (row[statId] ?? 0), 0);
 </script>
 
 {#if !game}
@@ -93,6 +100,41 @@
           </tbody>
         </table>
       </div>
+
+      {#if statColumns.length > 0}
+        <h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">Stats</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b-2 border-gray-300 text-sm text-gray-800">
+                <th class="py-2 pr-3 font-semibold">Player</th>
+                {#each statColumns as stat (stat.id)}
+                  <th class="py-2 px-3 font-semibold text-right" title={stat.label}>{stat.label}</th>
+                {/each}
+              </tr>
+            </thead>
+            <tbody>
+              {#each statRows as row (row.id)}
+                <tr class="border-b border-gray-200">
+                  <td class="py-2 pr-3 text-gray-900">
+                    {getDisplayName(row.participant, displayFormat)}
+                    {#if row.participant.jerseyNumber}<span class="text-gray-700 ml-1">#{row.participant.jerseyNumber}</span>{/if}
+                  </td>
+                  {#each statColumns as stat (stat.id)}
+                    <td class="py-2 px-3 text-right tabular-nums text-gray-900">{statTotals[row.id][stat.id] ?? '–'}</td>
+                  {/each}
+                </tr>
+              {/each}
+              <tr class="border-t-2 border-gray-300">
+                <td class="py-2 pr-3 font-bold text-gray-900">Team</td>
+                {#each statColumns as stat (stat.id)}
+                  <td class="py-2 px-3 text-right tabular-nums font-bold text-gray-900">{teamStatTotal(stat.id)}</td>
+                {/each}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      {/if}
     </div>
   </main>
 {/if}
