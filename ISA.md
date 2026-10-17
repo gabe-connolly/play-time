@@ -2,7 +2,7 @@
 slug: play-time
 project: ~/projects/personal/play-time
 phase: complete
-progress: 32/32
+progress: 34/34
 principal_stated_goal: "I want to take the app as it as as just a proof of concept, and take it to the next level by building it as an app that can be fully shipped on the Google play store."
 iteration: 2
 resumed_at: 2026-10-17T19:01:42.273Z
@@ -85,6 +85,11 @@ Why: Gabriel (2026-10-17): "add a 'settings' toggle in the top right - use a gea
 - [x] C31: The game summary shows a Stats table (each player × each recorded stat, plus team totals) only when the game has stat events. — Interceptor: summary shows Stats with Matthew 1 and Team 1; with no events there's no Stats heading
 - [x] A4: Recording or undoing a stat never changes playtime or the lineup, and a final game rejects new stat events. — Game.test: participants unchanged, playtime 10:00 intact, final game rejects record and undo
 
+### F8 · Tablet-only playtest release
+Why: Gabriel (2026-10-17): "Limit the play listing to tablets, and publish this latest version so I can playtest it."
+- [x] C32: The release bundle declares `supports-screens` with small and normal screens false and large and xlarge true, so Google Play hides the app from phones. — 78f3195; AAB manifest strings show smallScreens/normalScreens false, jarsigner "jar verified", sha256 80f76461…
+- [x] C33: Release 3 (1.1.0) is "Available to internal testers" on the internal track, carrying only bundle 3 with 2 screen layouts (large, xlarge). — Play Console: track shows "Latest release: 3 (1.1.0)"; preview showed phones 12,379 → 601 and tablets 6,797 → 6,792
+
 ### F0 · Cross-cutting
 Why: these hold across every feature.
 - [x] C22: Every text node on the new screens meets AAA contrast (in-browser audit, 0 failures). — in-browser audit 0 failures: home 6, team 30, new-game 41, settings 16, summary 55, game states 66/68/85; probe at 2.31 caught
@@ -129,6 +134,6 @@ Why: these hold across every feature.
 - [ ] Gabriel backs up `~/.config/play-time/` (the upload key).
 - [x] Branch `play-store` pushed to origin.
 - [x] Internal track Active with the "Play Time internal" list (personal Gmail). Opt-in: https://play.google.com/apps/internaltest/4700861366731156800
-- [ ] Before production: Gabriel decides between a phone-size landscape layout and limiting the Play device catalog to tablets, because Play will otherwise offer the app to phones.
+- [x] Gabriel chose tablets only (2026-10-17); shipped in 1.1.0 via supports-screens (78f3195).
 - [ ] Before production: store listing, app content declarations (LISTING.md has the answers), and the 12-tester 14-day closed test.
 - [ ] Uninstall the old `games.justforyou` debug app from the Fire tablet once Gabriel is happy with the new one.
